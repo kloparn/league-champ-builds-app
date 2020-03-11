@@ -9,7 +9,7 @@ function App() {
   const [champions, setChampions] = useState({} as HeroWrapper)
   useEffect(() => {
     async function fetchHeroes() {
-      const res = await axios.get("http://ddragon.leagueoflegends.com/cdn/10.5.1/data/en_US/champion.json")
+      const res = await axios.get("https://ddragon.leagueoflegends.com/cdn/10.5.1/data/en_US/champion.json")
       const data = res.data
       setChampions(data.data)
       console.log(data)
