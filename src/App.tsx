@@ -27,6 +27,7 @@ function App() {
 const HeroCardCollection = styled.section`
   display: flex;
   flex-wrap: wrap;
+  background-color: black;
 `
 
 export default App;

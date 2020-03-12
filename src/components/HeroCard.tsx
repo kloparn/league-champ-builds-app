@@ -7,16 +7,21 @@ import styled from 'styled-components'
 const HeroCard: React.FC<Hero> = (props) => {
     return (
         <Card>
-            <h1>{props.name}</h1>
+            <Title>{props.name}</Title>
             <Paragraph>{props.blurb}</Paragraph>
             <Image src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${props.name}_0.jpg`}></Image>
         </Card>
     )
 }
 
+const Title = styled.h1`
+    color: white;
+`
+
 const Paragraph = styled.p`
     width: 12rem;
     margin: 2rem;
+    color: white;
 `
 const Card = styled.div`
     display: flex;
