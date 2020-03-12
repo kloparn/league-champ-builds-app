@@ -3,12 +3,12 @@ import { Hero } from '../types'
 import styled from 'styled-components'
 
 //version, id, key, name, title, blurb, info, Image, tags, partype, stats,
+//<Paragraph>{props.blurb}</Paragraph>
 
 const HeroCard: React.FC<Hero> = (props) => {
     return (
         <Card>
             <Title>{props.name}</Title>
-            <Paragraph>{props.blurb}</Paragraph>
             <Image src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${props.name}_0.jpg`}></Image>
         </Card>
     )
@@ -28,7 +28,7 @@ const Card = styled.div`
     flex-direction: row;
     flex-wrap: wrap;
     margin: 3rem;
-    width: 53rem;
+    width: 15rem;
 `
 
 const Image = styled.img`
