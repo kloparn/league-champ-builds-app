@@ -32,9 +32,7 @@ const Card = styled.div`
 `
 
 const Image = styled.img`
-    border: 20px solid black;
     width: 20rem;
-    margin: 2rem;
 `;
 
 export default HeroCard
