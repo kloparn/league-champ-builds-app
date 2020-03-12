@@ -22,7 +22,7 @@ const Card = styled.div`
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin: 5rem;
+    margin: 3rem;
     width: 53rem;
 `
 
