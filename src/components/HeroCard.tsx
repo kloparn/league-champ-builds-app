@@ -4,12 +4,13 @@ import styled from 'styled-components'
 
 //version, id, key, name, title, blurb, info, Image, tags, partype, stats,
 //<Paragraph>{props.blurb}</Paragraph>
+//<Title>{props.name}</Title>
 
 const HeroCard: React.FC<Hero> = (props) => {
     return (
         <Card>
-            <Title>{props.name}</Title>
             <a href={`https://na.leagueoflegends.com/en-us/champions/${props.name?.toLocaleLowerCase()}`}><Image src={`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.name}_0.jpg`}></Image></a>
+            {console.log(props)}
         </Card>
     )
 }
@@ -29,11 +30,11 @@ const Card = styled.div`
     flex-direction: row;
     flex-wrap: wrap;
     margin: 3rem;
-    width: 15rem;
+    width: 5rem;
 `
 
 const Image = styled.img`
-    width: 20rem;
+    width: 10rem;
 `;
 
 export default HeroCard
