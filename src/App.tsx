@@ -12,16 +12,12 @@ function App() {
       const res = await axios.get("https://ddragon.leagueoflegends.com/cdn/10.5.1/data/en_US/champion.json")
       const data = res.data
       setChampions(data.data)
-      console.log(data)
-
     }
     fetchHeroes();
   }, [])
   return (
     <div>
       {Object.keys(champions).map(champ => <HeroCard key={champions[champ].key} name={champions[champ].id} blurb={champions[champ].blurb} />)}
-      <HeroCard name="Anton" blurb="I am sadly not a character"></HeroCard>
-      {JSON.stringify(champions["Aatrox"])}
     </div>
   );
 }
