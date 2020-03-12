@@ -10,7 +10,7 @@ export interface Hero {
         magic: number,
         difficulty: number
     },
-    imagine?: {
+    image?: {
         full: string,
         sprite: string,
         group: string,

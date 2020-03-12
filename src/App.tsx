@@ -3,8 +3,9 @@ import axios from 'axios'
 import HeroCard from './components/HeroCard'
 import logo from './logo.svg';
 import './App.css';
-import { Hero, HeroWrapper } from './types';
-
+import { HeroWrapper } from './types';
+import styled, { ThemeProvider } from "styled-components";
+import { theme } from "./styles/default-theme";
 function App() {
   const [champions, setChampions] = useState({} as HeroWrapper)
   useEffect(() => {
@@ -16,10 +17,16 @@ function App() {
     fetchHeroes();
   }, [])
   return (
-    <div>
-      {Object.keys(champions).map(champ => <HeroCard key={champions[champ].key} name={champions[champ].id} blurb={champions[champ].blurb} />)}
-    </div>
+    <ThemeProvider theme={theme}><HeroCardCollection>
+      {Object.keys(champions).map(champ => <HeroCard key={champions[champ].key} name={champions[champ].id} blurb={champions[champ].blurb} image={champions[champ].image} />)}
+    </HeroCardCollection>
+    </ThemeProvider>
   );
 }
+
+const HeroCardCollection = styled.section`
+  display: flex;
+  flex-wrap: wrap;
+`
 
 export default App;
