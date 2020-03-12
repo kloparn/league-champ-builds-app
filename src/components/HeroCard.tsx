@@ -9,7 +9,7 @@ const HeroCard: React.FC<Hero> = (props) => {
     return (
         <Card>
             <Title>{props.name}</Title>
-            <Image src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${props.name}_0.jpg`}></Image>
+            <Image src={`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.name}_0.jpg`}></Image>
         </Card>
     )
 }
@@ -23,6 +23,7 @@ const Paragraph = styled.p`
     margin: 2rem;
     color: white;
 `
+
 const Card = styled.div`
     display: flex;
     flex-direction: row;
