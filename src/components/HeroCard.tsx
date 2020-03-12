@@ -9,7 +9,7 @@ const HeroCard: React.FC<Hero> = (props) => {
     return (
         <Card>
             <Title>{props.name}</Title>
-            <a href='https://youtube.com/thehalomaster1111'><Image src={`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.name}_0.jpg`}></Image></a>
+            <a href={`https://na.leagueoflegends.com/en-us/champions/${props.name?.toLocaleLowerCase()}`}><Image src={`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.name}_0.jpg`}></Image></a>
         </Card>
     )
 }
