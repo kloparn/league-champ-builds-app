@@ -1,6 +1,7 @@
 import React from "react";
 import { Hero } from "../types";
 import styled from "styled-components";
+import { NavLink } from "react-router-dom";
 
 //version, id, key, name, title, blurb, info, Image, tags, partype, stats,
 //<Paragraph>{props.blurb}</Paragraph>
@@ -9,13 +10,11 @@ const HeroCard: React.FC<Hero> = (props) => {
   return (
     <Card>
       <Title>{props.name}</Title>
-      <a
-        href={`https://na.leagueoflegends.com/en-us/champions/${props.name?.toLocaleLowerCase()}`}
-      >
+      <NavLink to={`/${props.name}`}>
         <Image
           src={`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.name}_0.jpg`}
         ></Image>
-      </a>
+      </NavLink>
     </Card>
   );
 };
