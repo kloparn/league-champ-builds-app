@@ -43,8 +43,7 @@ const SelectedHeroPage: React.FC = () => {
               </Tags>
 
               <ParagrahpBox>
-                <p>{hero.blurb}</p>
-                <p></p>
+                <p>{hero.lore}</p>
               </ParagrahpBox>
               <br />
               <h2>Stats</h2>

@@ -5,6 +5,7 @@ export interface Hero {
   name?: string;
   blurb?: string;
   title?: string;
+  lore?: string;
   info?: {
     attack: number;
     defense: number;
