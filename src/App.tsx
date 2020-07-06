@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   HeroCollectionPage as HeroPage,
   SelectedHeroPage as SelectedPage,
 } from "./pages";
 import "./App.css";
-import styled, { ThemeProvider } from "styled-components";
+import { ThemeProvider } from "styled-components";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import { theme } from "./styles/default-theme";
@@ -15,7 +15,11 @@ function App() {
         <Route exact path="/" component={HeroPage} />
         <Route
           exact
-          path={`${window.location.pathname}`}
+          path={
+            window.location.pathname !== "/"
+              ? `${window.location.pathname}`
+              : "/will-not-load"
+          }
           component={SelectedPage}
         />
       </Router>

@@ -7,12 +7,11 @@ import axios from "axios";
 const HeroCollectionPage = () => {
   const [champions, setChampions] = useState({} as HeroWrapper);
   const [filter, setFilter] = useState("");
-  const [focused, setFocus] = useState(false);
 
   useEffect(() => {
     async function fetchHeroes() {
       const res = await axios.get(
-        "https://ddragon.leagueoflegends.com/cdn/10.5.1/data/en_US/champion.json"
+        "https://ddragon.leagueoflegends.com/cdn/10.13.1/data/en_US/champion.json"
       );
       const data = res.data;
       setChampions(data.data);
