@@ -49,17 +49,13 @@ const SelectedHeroPage: React.FC = () => {
     getAllUrlsForSkins();
   }, [hero.skins, hero.image, currentSkin]);
 
-  var x = -1;
-
   const displayNextImage = () => {
-    x = x === skinUrls.length - 1 ? 0 : x + 1;
+    let x: number =
+      skinUrls.indexOf(currentSkin) === skinUrls.length - 1
+        ? 0
+        : skinUrls.indexOf(currentSkin) + 1;
     setCurrentSkin(skinUrls[x]);
-    console.log(currentSkin); //Currently it swaps from the first picture and the back to the first one again.
-    // This occurs irregulary as if the timer does not work correctly.
-  };
-
-  const startTimer = () => {
-    setInterval(displayNextImage, 5000);
+    console.log(currentSkin);
   };
 
   return (
@@ -71,7 +67,7 @@ const SelectedHeroPage: React.FC = () => {
         {
           <HeroShowcase>
             <ChampPicture
-              onLoad={() => startTimer()}
+              onLoad={() => setTimeout(displayNextImage, 5000)}
               src={currentSkin}
               alt={hero.blurb}
             />
@@ -138,7 +134,6 @@ const Tags = styled.span`
   display: flex;
   justify-content: space-evenly;
 `;
-
 
 const Tag = styled.p`
   padding: 1rem;
