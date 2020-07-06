@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
 
 const SelectedHeroPage = () => {
-  return <div>This is the Selected hero page</div>;
+  return <Wrapper>This is the Selected hero page</Wrapper>;
 };
+
+const Wrapper = styled.div`
+  color: white;
+`;
 
 export default SelectedHeroPage;

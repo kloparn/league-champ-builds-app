@@ -10,7 +10,10 @@ const HeroCard: React.FC<Hero> = (props) => {
   return (
     <Card>
       <Title>{props.name}</Title>
-      <NavLink to={`/${props.name}`}>
+      <NavLink
+        to={`/${props.name}`}
+        onClick={() => window.location.replace(`/${props.name}`)}
+      >
         <Image
           src={`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.name}_0.jpg`}
         ></Image>

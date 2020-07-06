@@ -13,7 +13,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <Route exact path="/" component={HeroPage} />
-        <Route exact path="*" component={SelectedPage} />
+        <Route
+          exact
+          path={`${window.location.pathname}`}
+          component={SelectedPage}
+        />
       </Router>
     </ThemeProvider>
   );
