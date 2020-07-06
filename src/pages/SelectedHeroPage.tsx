@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
 const SelectedHeroPage = () => {
-  return <Wrapper>This is the Selected hero page</Wrapper>;
+  return (
+    <Wrapper>
+      Currently selected {`${window.location.pathname.split("/")[1]}`}
+    </Wrapper>
+  );
 };
 
 const Wrapper = styled.div`
