@@ -45,6 +45,14 @@ export interface Hero {
     attackspeedperlevel: number;
     attackspeed: number;
   };
+  skins?: [
+    {
+      id: number;
+      num: number;
+      name: string;
+      chromas: boolean;
+    }
+  ];
 }
 
 export interface HeroWrapper {

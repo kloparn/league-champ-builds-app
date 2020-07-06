@@ -3,9 +3,12 @@ import styled from "styled-components";
 import { Hero } from "../types";
 import axios from "axios";
 import DifficultyBar from "../components/DifficultyBar";
+import shortid from "shortid";
 
 const SelectedHeroPage: React.FC = () => {
   const [hero, setHero] = useState({} as Hero);
+  const [skinAmount, setSkinAmount] = useState(0);
+  const [skinUrls, setSkinUrls] = useState([]);
 
   useEffect(() => {
     const getCurrentHero = async () => {
@@ -18,17 +21,28 @@ const SelectedHeroPage: React.FC = () => {
       setHero(data.data[window.location.pathname.split("/")[1]]);
     };
 
+    const updateNumberOfSkins = () => {
+      let counter = 0;
+      hero.skins?.map((e) => {
+        if (e.name !== "default") {
+          counter++;
+        }
+      });
+      setSkinAmount(counter);
+    };
+
     getCurrentHero();
-  }, []);
+    updateNumberOfSkins();
+  }, [hero.skins]);
 
   return (
     <div>
       <Title>
         {hero.name} - {hero.title}
       </Title>
-      <Wrapper>
+      <Wrapper key={hero.key}>
         {
-          <HeroShowcase key={hero.key}>
+          <HeroShowcase>
             <ChampPicture
               src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
                 hero.image?.full.split(".")[0]
@@ -36,9 +50,9 @@ const SelectedHeroPage: React.FC = () => {
               alt={hero.blurb}
             />
             <ParagrahpBox>
-              <Tags>
+              <Tags key={hero.key}>
                 {hero.tags?.map((tag) => (
-                  <Tag>{tag}</Tag>
+                  <Tag key={shortid.generate()}>{tag}</Tag>
                 ))}
               </Tags>
 
@@ -85,6 +99,7 @@ const SelectedHeroPage: React.FC = () => {
           </HeroShowcase>
         }
       </Wrapper>
+      <TempSkinIdentifier>{skinAmount}</TempSkinIdentifier>
     </div>
   );
 };
@@ -94,9 +109,16 @@ const Title = styled.h1`
   text-align: center;
 `;
 
-const Tags = styled.section`
+const Tags = styled.span`
   display: flex;
   justify-content: space-evenly;
+`;
+
+const TempSkinIdentifier = styled.p`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  color: white;
 `;
 
 const Tag = styled.p`
@@ -167,7 +189,7 @@ const ChampPicture = styled.img`
   }
 `;
 
-const ParagrahpBox = styled.p`
+const ParagrahpBox = styled.span`
   padding: 1rem;
 `;
 
