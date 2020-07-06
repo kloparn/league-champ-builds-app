@@ -7,8 +7,8 @@ import shortid from "shortid";
 
 const SelectedHeroPage: React.FC = () => {
   const [hero, setHero] = useState({} as Hero);
-  const [skinAmount, setSkinAmount] = useState(0);
-  const [skinUrls, setSkinUrls] = useState([]);
+  const [skinUrls, setSkinUrls] = useState([] as string[]);
+  const [currentSkin, setCurrentSkin] = useState("");
 
   useEffect(() => {
     const getCurrentHero = async () => {
@@ -21,19 +21,46 @@ const SelectedHeroPage: React.FC = () => {
       setHero(data.data[window.location.pathname.split("/")[1]]);
     };
 
-    const updateNumberOfSkins = () => {
-      let counter = 0;
+    const getAllUrlsForSkins = () => {
+      let idArr = [] as number[];
       hero.skins?.map((e) => {
         if (e.name !== "default") {
-          counter++;
+          idArr.push(e.num);
         }
       });
-      setSkinAmount(counter);
+      if (idArr.length > 0) {
+        let urls = [
+          `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
+            hero.image?.full.split(".")[0]
+          }_0.jpg`,
+        ];
+        for (let i = 0; i < idArr.length; i++) {
+          urls.push(
+            `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
+              hero.image?.full.split(".")[0]
+            }_${idArr[i]}.jpg`
+          );
+        }
+        setSkinUrls(urls);
+        if (currentSkin === "") setCurrentSkin(urls[0]);
+      }
     };
-
     getCurrentHero();
-    updateNumberOfSkins();
-  }, [hero.skins]);
+    getAllUrlsForSkins();
+  }, [hero.skins, hero.image, currentSkin]);
+
+  var x = -1;
+
+  const displayNextImage = () => {
+    x = x === skinUrls.length - 1 ? 0 : x + 1;
+    setCurrentSkin(skinUrls[x]);
+    console.log(currentSkin); //Currently it swaps from the first picture and the back to the first one again.
+    // This occurs irregulary as if the timer does not work correctly.
+  };
+
+  const startTimer = () => {
+    setInterval(displayNextImage, 5000);
+  };
 
   return (
     <div>
@@ -44,9 +71,8 @@ const SelectedHeroPage: React.FC = () => {
         {
           <HeroShowcase>
             <ChampPicture
-              src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
-                hero.image?.full.split(".")[0]
-              }_0.jpg`}
+              onLoad={() => startTimer()}
+              src={currentSkin}
               alt={hero.blurb}
             />
             <ParagrahpBox>
@@ -99,7 +125,6 @@ const SelectedHeroPage: React.FC = () => {
           </HeroShowcase>
         }
       </Wrapper>
-      <TempSkinIdentifier>{skinAmount}</TempSkinIdentifier>
     </div>
   );
 };
@@ -114,12 +139,6 @@ const Tags = styled.span`
   justify-content: space-evenly;
 `;
 
-const TempSkinIdentifier = styled.p`
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  color: white;
-`;
 
 const Tag = styled.p`
   padding: 1rem;
