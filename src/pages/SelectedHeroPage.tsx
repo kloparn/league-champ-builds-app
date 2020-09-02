@@ -13,7 +13,7 @@ const SelectedHeroPage: React.FC = () => {
   useEffect(() => {
     const getCurrentHero = async () => {
       const res = await axios.get(
-        `https://ddragon.leagueoflegends.com/cdn/10.13.1/data/en_US/champion/${
+        `https://ddragon.leagueoflegends.com/cdn/10.16.1/data/en_US/champion/${
           window.location.pathname.split("/")[1]
         }.json`
       );
@@ -157,6 +157,7 @@ const ChampPicture = styled.img`
   max-width: 120vh;
   object-fit: contain;
   animation: fadeIn ease 3s;
+
   -webkit-animation: fadeIn ease 3s;
   -moz-animation: fadeIn ease 3s;
   -o-animation: fadeIn ease 3s;

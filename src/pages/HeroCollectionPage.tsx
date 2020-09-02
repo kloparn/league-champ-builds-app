@@ -11,7 +11,7 @@ const HeroCollectionPage = () => {
   useEffect(() => {
     async function fetchHeroes() {
       const res = await axios.get(
-        "https://ddragon.leagueoflegends.com/cdn/10.13.1/data/en_US/champion.json"
+        "https://ddragon.leagueoflegends.com/cdn/10.16.1/data/en_US/champion.json"
       );
       const data = res.data;
       setChampions(data.data);
