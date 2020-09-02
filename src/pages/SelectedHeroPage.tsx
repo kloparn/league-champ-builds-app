@@ -9,11 +9,19 @@ const SelectedHeroPage: React.FC = () => {
   const [hero, setHero] = useState({} as Hero);
   const [skinUrls, setSkinUrls] = useState([] as string[]);
   const [currentSkin, setCurrentSkin] = useState("");
+  const [version, setVersion] = useState("");
 
   useEffect(() => {
+    const fetchVersion = async () => {
+      const res = await axios.get(
+        "https://ddragon.leagueoflegends.com/api/versions.json"
+      );
+      const data = res.data;
+      setVersion(data[0]);
+    };
     const getCurrentHero = async () => {
       const res = await axios.get(
-        `https://ddragon.leagueoflegends.com/cdn/10.16.1/data/en_US/champion/${
+        `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion/${
           window.location.pathname.split("/")[1]
         }.json`
       );
@@ -45,9 +53,10 @@ const SelectedHeroPage: React.FC = () => {
         if (currentSkin === "") setCurrentSkin(urls[0]);
       }
     };
+    fetchVersion();
     getCurrentHero();
     getAllUrlsForSkins();
-  }, [hero.skins, hero.image, currentSkin]);
+  }, [version, hero.skins, hero.image, currentSkin]);
 
   const displayNextImage = () => {
     let x: number =

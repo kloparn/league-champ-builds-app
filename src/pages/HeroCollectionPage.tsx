@@ -7,17 +7,26 @@ import axios from "axios";
 const HeroCollectionPage = () => {
   const [champions, setChampions] = useState({} as HeroWrapper);
   const [filter, setFilter] = useState("");
+  const [version, setVersion] = useState("");
 
   useEffect(() => {
-    async function fetchHeroes() {
+    const fetchVersion = async () => {
       const res = await axios.get(
-        "https://ddragon.leagueoflegends.com/cdn/10.16.1/data/en_US/champion.json"
+        "https://ddragon.leagueoflegends.com/api/versions.json"
+      );
+      const data = res.data;
+      setVersion(data[0]);
+    };
+    const fetchHeroes = async () => {
+      const res = await axios.get(
+        `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`
       );
       const data = res.data;
       setChampions(data.data);
-    }
+    };
+    fetchVersion();
     fetchHeroes();
-  }, []);
+  }, [version]);
 
   return (
     <div className="searchbar">
