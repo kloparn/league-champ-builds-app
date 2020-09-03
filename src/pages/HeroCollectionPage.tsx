@@ -68,6 +68,7 @@ const HeroCardCollection = styled.section`
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  min-height: 86.9vh;
 `;
 
 const SearchLabel = styled.label`

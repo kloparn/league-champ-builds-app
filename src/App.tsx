@@ -3,28 +3,34 @@ import {
   HeroCollectionPage as HeroPage,
   SelectedHeroPage as SelectedPage,
 } from "./pages";
+import Footer from "./components/Footer";
 import "./App.css";
-import { ThemeProvider } from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import { theme } from "./styles/default-theme";
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Router>
-        <Route exact path="/" component={HeroPage} />
-        <Route
-          exact
-          path={
-            window.location.pathname !== "/"
-              ? `${window.location.pathname}`
-              : "/will-not-load"
-          }
-          component={SelectedPage}
-        />
-      </Router>
+      <Screen>
+        <Router>
+          <Route exact path="/" component={HeroPage} />
+          <Route
+            exact
+            path={
+              window.location.pathname !== "/"
+                ? `${window.location.pathname}`
+                : "/will-not-load"
+            }
+            component={SelectedPage}
+          />
+        </Router>
+        <Footer />
+      </Screen>
     </ThemeProvider>
   );
 }
+
+const Screen = styled.div``;
 
 export default App;
