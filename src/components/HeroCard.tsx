@@ -29,9 +29,11 @@ const Title = styled.h1`
 
 const Card = styled.div`
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: row;
   flex-wrap: wrap;
-  margin: 3rem;
+  margin: 2.5rem;
   width: 5rem;
 `;
 

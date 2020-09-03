@@ -30,13 +30,15 @@ const HeroCollectionPage = () => {
 
   return (
     <div className="searchbar">
-      <SearchLabel htmlFor="search">Search for a champion</SearchLabel>
-      <SearchInput
-        type="text"
-        onChange={(e) => {
-          setFilter(e.target.value.toLowerCase());
-        }}
-      />
+      <SearchWrapper>
+        <SearchLabel htmlFor="search">Search for a champion</SearchLabel>
+        <SearchInput
+          type="text"
+          onChange={(e) => {
+            setFilter(e.target.value.toLowerCase());
+          }}
+        />
+      </SearchWrapper>
       <HeroCardCollection>
         {Object.keys(champions)
           .filter((c) => c.toLowerCase().includes(filter))
@@ -54,20 +56,32 @@ const HeroCollectionPage = () => {
   );
 };
 
+const SearchWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+`;
+
 const HeroCardCollection = styled.section`
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 `;
 
 const SearchLabel = styled.label`
   font-size: 32px;
   padding: 20px;
   color: white;
+  z-index: 1;
 `;
 const SearchInput = styled.input`
   color: purple;
+  width: 15rem;
   background-color: green;
   font-size: 32px;
+  height: 20%;
 `;
 
 export default HeroCollectionPage;
