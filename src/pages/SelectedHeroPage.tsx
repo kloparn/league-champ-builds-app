@@ -189,17 +189,22 @@ const Title = styled.h1`
 `;
 
 const BackNavLink = styled(NavLink)`
-  font-size: 2rem;
+  font-size: 1.5rem;
   color: white;
   text-decoration: none;
   position: relative;
-  top: 50px;
-  padding: 2rem;
+  top: 25px;
+  padding: 1rem;
   border: 2px;
   z-index: 3;
   background-color: transparent;
   border: 2px solid white;
   border-radius: 100%;
+  @media (max-width: 800px) {
+    font-size: 1.5rem;
+    top: 10px;
+    padding: 0.5rem;
+  }
 `;
 
 const StatsBox = styled.span`
