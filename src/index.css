@@ -46,3 +46,7 @@ div.searchbar {
   transform: rotate(135deg);
   -webkit-transform: rotate(135deg);
 }
+
+.text-center {
+  text-align: center;
+}

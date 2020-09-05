@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Hero } from "../types";
 import axios from "axios";
 import DifficultyBar from "../components/DifficultyBar";
+import DynamicStatGiver from "../components/DynamicStatGiver";
 import shortid from "shortid";
 
 const SelectedHeroPage: React.FC = () => {
@@ -97,54 +98,83 @@ const SelectedHeroPage: React.FC = () => {
               onClick={displayNextImage}
               className="arrow right"
             ></NextSkin>
-
-            <ParagrahpBox>
-              <Tags key={hero.key}>
-                {hero.tags?.map((tag) => (
-                  <Tag key={shortid.generate()}>{tag}</Tag>
-                ))}
-              </Tags>
-
+            <h4 className="text-center">{hero.lore}</h4>
+            <Tags key={hero.key}>
+              {hero.tags?.map((tag) => (
+                <Tag key={shortid.generate()}>{tag}</Tag>
+              ))}
+            </Tags>
+            <StatsSection>
               <ParagrahpBox>
-                <p>{hero.lore}</p>
+                <br />
+                <h2>Stats</h2>
+                <h3>
+                  Attack power
+                  <DifficultyBar
+                    difficulty={
+                      hero.info?.attack !== undefined ? hero.info?.attack : 0
+                    }
+                  />
+                </h3>
+                <h3>
+                  Defense power
+                  <DifficultyBar
+                    difficulty={
+                      hero.info?.defense !== undefined ? hero.info?.defense : 0
+                    }
+                  />
+                </h3>
+                <h3>
+                  Magic power
+                  <DifficultyBar
+                    difficulty={
+                      hero.info?.magic !== undefined ? hero.info?.magic : 0
+                    }
+                  />
+                </h3>
+                <h3>
+                  Difficulty
+                  <DifficultyBar
+                    difficulty={
+                      hero.info?.difficulty !== undefined
+                        ? hero.info?.difficulty
+                        : 0
+                    }
+                  />
+                </h3>
               </ParagrahpBox>
-              <br />
-              <h2>Stats</h2>
-              <h3>
-                Attack power
-                <DifficultyBar
-                  difficulty={
-                    hero.info?.attack !== undefined ? hero.info?.attack : 0
-                  }
-                />
-              </h3>
-              <h3>
-                Defense power
-                <DifficultyBar
-                  difficulty={
-                    hero.info?.defense !== undefined ? hero.info?.defense : 0
-                  }
-                />
-              </h3>
-              <h3>
-                Magic power
-                <DifficultyBar
-                  difficulty={
-                    hero.info?.magic !== undefined ? hero.info?.magic : 0
-                  }
-                />
-              </h3>
-              <h3>
-                Difficulty
-                <DifficultyBar
-                  difficulty={
-                    hero.info?.difficulty !== undefined
-                      ? hero.info?.difficulty
-                      : 0
-                  }
-                />
-              </h3>
-            </ParagrahpBox>
+              <StatsBox>
+                <Title>Stats</Title>
+                {DynamicStatGiver(
+                  "Health",
+                  hero.stats?.hp!,
+                  hero.stats?.hpperlevel!
+                )}
+                {DynamicStatGiver(
+                  "Health Regen",
+                  hero.stats?.hpregen!,
+                  hero.stats?.hpregenperlevel!
+                )}
+                {DynamicStatGiver(
+                  "Armor",
+                  hero.stats?.armor!,
+                  hero.stats?.armorperlevel!
+                )}
+                {DynamicStatGiver(
+                  "Magic Resist",
+                  hero.stats?.spellblock!,
+                  hero.stats?.spellblockperlevel!
+                )}
+                <p>
+                  Move. speed <strong>{hero.stats?.movespeed!}</strong>
+                </p>
+                {DynamicStatGiver(
+                  "Attack Damage",
+                  hero.stats?.attackdamage!,
+                  hero.stats?.attackdamageperlevel!
+                )}
+              </StatsBox>
+            </StatsSection>
           </HeroShowcase>
         }
       </Wrapper>
@@ -155,6 +185,20 @@ const SelectedHeroPage: React.FC = () => {
 const Title = styled.h1`
   color: white;
   text-align: center;
+`;
+
+const StatsBox = styled.span`
+  margin-top: 6rem;
+  margin-right: 7rem;
+  padding: 1rem;
+  padding-top: 0;
+  border: 2px solid white;
+  width: 30%;
+  @media (max-width: 1400px) {
+    width: 100%;
+    margin: 0;
+    margin-bottom: 1rem;
+  }
 `;
 
 const NextSkin = styled.button`
@@ -168,6 +212,7 @@ const PreviousSkin = styled.button`
 const Tags = styled.span`
   display: flex;
   justify-content: space-evenly;
+  min-width: 100%;
 `;
 
 const Tag = styled.p`
@@ -184,6 +229,34 @@ const Wrapper = styled.div`
   align-items: center;
   padding-left: 1rem;
   padding-right: 1rem;
+`;
+
+const ParagrahpBox = styled.span`
+  width: 70%;
+  padding: 1rem;
+  @media (max-width: 1400px) {
+    width: 100%;
+  }
+`;
+
+const StatsSection = styled.div`
+  min-width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  @media (max-width: 1400px) {
+    flex-flow: wrap;
+  }
+`;
+
+const HeroShowcase = styled.section`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-flow: wrap;
+  @media (max-width: 1400px) {
+    display: inline;
+  }
 `;
 
 const ChampPicture = styled.img`
@@ -236,20 +309,6 @@ const ChampPicture = styled.img`
     100% {
       opacity: 1;
     }
-  }
-`;
-
-const ParagrahpBox = styled.span`
-  padding: 1rem;
-`;
-
-const HeroShowcase = styled.section`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-flow: wrap;
-  @media (max-width: 1400px) {
-    display: inline;
   }
 `;
 
