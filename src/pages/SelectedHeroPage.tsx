@@ -107,7 +107,6 @@ const SelectedHeroPage: React.FC = () => {
             <StatsSection>
               <ParagrahpBox>
                 <br />
-                <h2>Stats</h2>
                 <h3>
                   Attack power
                   <DifficultyBar
@@ -190,6 +189,7 @@ const Title = styled.h1`
 const StatsBox = styled.span`
   margin-top: 6rem;
   margin-right: 7rem;
+  margin-bottom: 1rem;
   padding: 1rem;
   padding-top: 0;
   border: 2px solid white;
