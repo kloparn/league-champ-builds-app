@@ -67,6 +67,15 @@ const SelectedHeroPage: React.FC = () => {
     console.log(currentSkin);
   };
 
+  const displayPreviousImage = () => {
+    let x: number =
+      skinUrls.indexOf(currentSkin) === 0
+        ? skinUrls.length - 1
+        : skinUrls.indexOf(currentSkin) - 1;
+    setCurrentSkin(skinUrls[x]);
+    console.log(currentSkin);
+  };
+
   return (
     <div>
       <Title>
@@ -75,11 +84,20 @@ const SelectedHeroPage: React.FC = () => {
       <Wrapper key={hero.key}>
         {
           <HeroShowcase>
+            <PreviousSkin
+              onClick={displayPreviousImage}
+              className="arrow left"
+            ></PreviousSkin>
             <ChampPicture
-              onLoad={() => setTimeout(displayNextImage, 5000)}
+              //onLoad={() => setTimeout(displayNextImage, 5000)}
               src={currentSkin}
               alt={hero.blurb}
             />
+            <NextSkin
+              onClick={displayNextImage}
+              className="arrow right"
+            ></NextSkin>
+
             <ParagrahpBox>
               <Tags key={hero.key}>
                 {hero.tags?.map((tag) => (
@@ -137,6 +155,14 @@ const SelectedHeroPage: React.FC = () => {
 const Title = styled.h1`
   color: white;
   text-align: center;
+`;
+
+const NextSkin = styled.button`
+  margin: 5vh;
+`;
+
+const PreviousSkin = styled.button`
+  margin: 5vh;
 `;
 
 const Tags = styled.span`
@@ -221,6 +247,7 @@ const HeroShowcase = styled.section`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-flow: wrap;
   @media (max-width: 1400px) {
     display: inline;
   }
