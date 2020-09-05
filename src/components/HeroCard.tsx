@@ -9,7 +9,7 @@ import { NavLink } from "react-router-dom";
 const HeroCard: React.FC<Hero> = (props) => {
   return (
     <Card>
-      <Title>{props.name}</Title>
+      <Title>{props.name === "MonkeyKing" ? "Wukong" : props.name}</Title>
       <NavLink
         to={`/${props.name}`}
         onClick={() => window.location.replace(`/${props.name}`)}
