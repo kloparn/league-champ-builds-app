@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Hero } from "../types";
+import { NavLink } from "react-router-dom";
 import axios from "axios";
 import DifficultyBar from "../components/DifficultyBar";
 import DynamicStatGiver from "../components/DynamicStatGiver";
@@ -79,6 +80,7 @@ const SelectedHeroPage: React.FC = () => {
 
   return (
     <div>
+      <BackNavLink to="/">Back</BackNavLink>
       <Title>
         {hero.name} - {hero.title}
       </Title>
@@ -186,6 +188,20 @@ const Title = styled.h1`
   text-align: center;
 `;
 
+const BackNavLink = styled(NavLink)`
+  font-size: 2rem;
+  color: white;
+  text-decoration: none;
+  position: relative;
+  top: 50px;
+  padding: 2rem;
+  border: 2px;
+  z-index: 3;
+  background-color: transparent;
+  border: 2px solid white;
+  border-radius: 100%;
+`;
+
 const StatsBox = styled.span`
   margin-top: 6rem;
   margin-right: 7rem;
@@ -203,10 +219,12 @@ const StatsBox = styled.span`
 
 const NextSkin = styled.button`
   margin: 5vh;
+  cursor: pointer;
 `;
 
 const PreviousSkin = styled.button`
   margin: 5vh;
+  cursor: pointer;
 `;
 
 const Tags = styled.span`
