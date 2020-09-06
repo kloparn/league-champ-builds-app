@@ -306,6 +306,7 @@ const ChampPicture = styled.img`
   max-width: 120vh;
   object-fit: contain;
   animation: fadeIn ease 3s;
+  border: 5px solid black;
 
   -webkit-animation: fadeIn ease 3s;
   -moz-animation: fadeIn ease 3s;
