@@ -223,6 +223,7 @@ const StatRow = styled.p`
 `;
 
 const StatsBox = styled.span`
+  background-color: darkblue;
   margin-top: 6rem;
   margin-right: 7rem;
   margin-bottom: 1rem;
