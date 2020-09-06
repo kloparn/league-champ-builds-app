@@ -79,7 +79,7 @@ const SelectedHeroPage: React.FC = () => {
   };
 
   return (
-    <div>
+    <SelectedHero>
       <BackNavLink to="/">Back</BackNavLink>
       <Title>
         {hero.name} - {hero.title}
@@ -179,13 +179,23 @@ const SelectedHeroPage: React.FC = () => {
           </HeroShowcase>
         }
       </Wrapper>
-    </div>
+    </SelectedHero>
   );
 };
 
 const Title = styled.h1`
   color: white;
   text-align: center;
+`;
+
+const SelectedHero = styled.div`
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url(${() =>
+    `http://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
+      window.location.pathname.split("/")[1]
+    }_0.jpg`});
+  background-repeat: none;
 `;
 
 const BackNavLink = styled(NavLink)`
