@@ -189,18 +189,19 @@ const Title = styled.h1`
 `;
 
 const SelectedHero = styled.div`
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
   background-image: url(${() =>
     `http://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
       window.location.pathname.split("/")[1]
     }_0.jpg`});
-  background-repeat: none;
+  background-size: cover;
+  background-attachment: fixed;
+  text-shadow: 2px 2px black;
 `;
 
 const BackNavLink = styled(NavLink)`
   font-size: 1.5rem;
   color: white;
+  text-shadow: 2px 2px black;
   text-decoration: none;
   position: relative;
   top: 25px;
@@ -225,6 +226,7 @@ const StatsBox = styled.span`
   margin-top: 6rem;
   margin-right: 7rem;
   margin-bottom: 1rem;
+  text-shadow: 2px 2px black;
   padding: 1rem;
   padding-top: 0;
   border: 2px solid white;
@@ -250,6 +252,7 @@ const Tags = styled.span`
   display: flex;
   justify-content: space-evenly;
   min-width: 100%;
+  text-shadow: 2px 2px white;
 `;
 
 const Tag = styled.p`
