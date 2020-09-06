@@ -166,9 +166,9 @@ const SelectedHeroPage: React.FC = () => {
                   hero.stats?.spellblock!,
                   hero.stats?.spellblockperlevel!
                 )}
-                <p>
+                <StatRow>
                   Move. speed <strong>{hero.stats?.movespeed!}</strong>
-                </p>
+                </StatRow>
                 {DynamicStatGiver(
                   "Attack Damage",
                   hero.stats?.attackdamage!,
@@ -205,6 +205,10 @@ const BackNavLink = styled(NavLink)`
     top: 10px;
     padding: 0.5rem;
   }
+`;
+
+const StatRow = styled.p`
+  border: 2px solid white;
 `;
 
 const StatsBox = styled.span`

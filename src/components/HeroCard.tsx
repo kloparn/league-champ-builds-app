@@ -25,6 +25,7 @@ const HeroCard: React.FC<Hero> = (props) => {
 const Title = styled.h1`
   color: white;
   font-family: Georgia, "Times New Roman", Times, serif;
+  text-shadow: 2px 2px black;
 `;
 
 const Card = styled.div`

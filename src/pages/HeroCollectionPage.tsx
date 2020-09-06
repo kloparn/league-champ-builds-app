@@ -29,7 +29,7 @@ const HeroCollectionPage = () => {
   }, [version]);
 
   return (
-    <div className="searchbar">
+    <Collection className="searchbar">
       <SearchWrapper>
         <SearchLabel htmlFor="search">Search for a champion</SearchLabel>
         <SearchInput
@@ -52,9 +52,15 @@ const HeroCollectionPage = () => {
           ))}
       </HeroCardCollection>
       ;
-    </div>
+    </Collection>
   );
 };
+
+const Collection = styled.div`
+  background-image: url("league-background.png");
+  background-size: cover;
+  background-attachment: fixed;
+`;
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -78,9 +84,9 @@ const SearchLabel = styled.label`
   z-index: 1;
 `;
 const SearchInput = styled.input`
-  color: purple;
+  color: black;
   width: 15rem;
-  background-color: green;
+  background-color: white;
   font-size: 32px;
   height: 20%;
 `;

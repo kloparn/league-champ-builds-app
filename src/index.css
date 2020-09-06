@@ -16,14 +16,6 @@ div.searchbar {
   padding: 10px;
 }
 
-/*
- This down section needs to be changed as it makes everything annoying with writing the 
- "color: white;"
-*/
-* {
-  background-color: black;
-}
-
 .arrow {
   border: solid white;
   color: white;
