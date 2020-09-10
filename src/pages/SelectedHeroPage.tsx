@@ -5,7 +5,6 @@ import { NavLink } from "react-router-dom";
 import axios from "axios";
 import DifficultyBar from "../components/DifficultyBar";
 import DynamicStatGiver from "../components/DynamicStatGiver";
-import shortid from "shortid";
 
 const SelectedHeroPage: React.FC = () => {
   const [hero, setHero] = useState({} as Hero);
@@ -103,7 +102,7 @@ const SelectedHeroPage: React.FC = () => {
             <h4 className="text-center">{hero.lore}</h4>
             <Tags key={hero.key}>
               {hero.tags?.map((tag) => (
-                <Tag key={shortid.generate()}>{tag}</Tag>
+                <Tag key={Math.random() * 100}>{tag}</Tag>
               ))}
             </Tags>
             <StatsSection>
@@ -253,14 +252,13 @@ const Tags = styled.span`
   display: flex;
   justify-content: space-evenly;
   min-width: 100%;
-  text-shadow: 2px 2px white;
 `;
 
 const Tag = styled.p`
   padding: 1rem;
-  background-color: white;
+  background-color: black;
   border-radius: 25px;
-  color: black;
+  color: white;
 `;
 
 const Wrapper = styled.div`
