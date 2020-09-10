@@ -100,7 +100,7 @@ const SelectedHeroPage: React.FC = () => {
               className="arrow right"
             ></NextSkin>
             <h4 className="text-center">{hero.lore}</h4>
-            <Tags key={hero.key}>
+            <Tags>
               {hero.tags?.map((tag) => (
                 <Tag key={Math.random() * 100}>{tag}</Tag>
               ))}
@@ -248,7 +248,7 @@ const PreviousSkin = styled.button`
   cursor: pointer;
 `;
 
-const Tags = styled.span`
+const Tags = styled.section`
   display: flex;
   justify-content: space-evenly;
   min-width: 100%;

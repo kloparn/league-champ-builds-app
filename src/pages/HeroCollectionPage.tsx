@@ -68,6 +68,7 @@ const HeroCollectionPage = () => {
           <option value="Marksman">Marksman</option>
         </TagSearch>
       </SearchWrapper>
+      <Filler></Filler>
       <HeroCardCollection>
         {Object.keys(champions)
           .filter((c) => c.toLowerCase().includes(filter))
@@ -94,6 +95,13 @@ const HeroCollectionPage = () => {
   );
 };
 
+const Filler = styled.div`
+  min-height: 5vh;
+  @media (max-width: 950px) {
+    min-height: 0vh;
+  }
+`;
+
 const Collection = styled.div`
   background-image: url("league-background.png");
   background-size: cover;
@@ -104,8 +112,8 @@ const SearchWrapper = styled.div`
   position: fixed;
   left: 30%;
   text-shadow: 2px 2px black;
+  background-color: lightblue;
   display: flex;
-  margin-top: -10 px;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
@@ -139,7 +147,8 @@ const TagSearch = styled.select`
 const SearchLabel = styled.label`
   font-size: 32px;
   padding: 20px;
-  color: white;
+  color: black;
+  text-shadow: 2px 2px white;
   z-index: 1;
 `;
 const SearchInput = styled.input`
