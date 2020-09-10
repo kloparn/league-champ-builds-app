@@ -34,8 +34,11 @@ const Card = styled.div`
   align-items: center;
   flex-direction: row;
   flex-wrap: wrap;
-  margin: 2.5rem;
+  margin: 3rem;
   width: 5rem;
+  @media (max-width: 500px) {
+    margin: 2.5rem;
+  }
 `;
 
 const Image = styled.img`

@@ -8,6 +8,7 @@ const HeroCollectionPage = () => {
   const [champions, setChampions] = useState({} as HeroWrapper);
   const [filter, setFilter] = useState("");
   const [version, setVersion] = useState("");
+  const [tag, setTag] = useState("");
 
   useEffect(() => {
     const fetchVersion = async () => {
@@ -28,6 +29,20 @@ const HeroCollectionPage = () => {
     fetchHeroes();
   }, [version]);
 
+  const contains = (tags: [string], pickedTag: string) => {
+    let tempExists: boolean = false;
+
+    // eslint-disable-next-line array-callback-return
+    tags.map((tag) => {
+      tag === pickedTag
+        ? (tempExists = true)
+        : tempExists === true
+        ? (tempExists = true)
+        : (tempExists = false);
+    });
+    return tempExists;
+  };
+
   return (
     <Collection className="searchbar">
       <SearchWrapper>
@@ -38,18 +53,41 @@ const HeroCollectionPage = () => {
             setFilter(e.target.value.toLowerCase());
           }}
         />
+        <TagSearch
+          name="role"
+          onChange={(e) => {
+            setTag(e.target.value);
+          }}
+        >
+          <option value="None">All</option>
+          <option value="Fighter">Fighter</option>
+          <option value="Tank">Tank</option>
+          <option value="Support">Support</option>
+          <option value="Mage">Mage</option>
+          <option value="Assassin">Assassin</option>
+          <option value="Marksman">Marksman</option>
+        </TagSearch>
       </SearchWrapper>
       <HeroCardCollection>
         {Object.keys(champions)
           .filter((c) => c.toLowerCase().includes(filter))
-          .map((champ) => (
-            <HeroCard
-              key={champions[champ].key}
-              name={champions[champ].id}
-              blurb={champions[champ].blurb}
-              image={champions[champ].image}
-            />
-          ))}
+          .map((champ) =>
+            tag === "" || tag === "None" ? (
+              <HeroCard
+                key={champions[champ].key}
+                name={champions[champ].id}
+                blurb={champions[champ].blurb}
+                image={champions[champ].image}
+              />
+            ) : contains(champions[champ].tags!, tag) ? (
+              <HeroCard
+                key={champions[champ].key}
+                name={champions[champ].id}
+                blurb={champions[champ].blurb}
+                image={champions[champ].image}
+              />
+            ) : null
+          )}
       </HeroCardCollection>
       ;
     </Collection>
@@ -63,10 +101,24 @@ const Collection = styled.div`
 `;
 
 const SearchWrapper = styled.div`
+  position: fixed;
+  left: 30%;
+  text-shadow: 2px 2px black;
   display: flex;
+  margin-top: -10 px;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  @media (max-width: 950px) {
+    left: 0 !important;
+    position: relative;
+  }
+  @media (max-width: 1300px) {
+    left: 20%;
+  }
+  @media (max-width: 1030px) {
+    left: 15%;
+  }
 `;
 
 const HeroCardCollection = styled.section`
@@ -75,6 +127,13 @@ const HeroCardCollection = styled.section`
   justify-content: center;
   align-items: center;
   min-height: 86.9vh;
+`;
+
+const TagSearch = styled.select`
+  text-align: center;
+  font-size: 32px;
+  margin: 5px;
+  z-index: 1;
 `;
 
 const SearchLabel = styled.label`
