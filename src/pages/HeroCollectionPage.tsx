@@ -43,6 +43,8 @@ const HeroCollectionPage = () => {
     return tempExists;
   };
 
+  console.log("main page");
+
   return (
     <Collection className="searchbar">
       <SearchWrapper>
@@ -110,22 +112,17 @@ const Collection = styled.div`
 
 const SearchWrapper = styled.div`
   position: fixed;
-  left: 30%;
+  width: 100%;
   text-shadow: 2px 2px black;
-  background-color: lightblue;
+  background-color: #0f1925;
   display: flex;
   flex-wrap: wrap;
+  margin: 0;
   justify-content: center;
   align-items: center;
   @media (max-width: 950px) {
     left: 0 !important;
     position: relative;
-  }
-  @media (max-width: 1300px) {
-    left: 20%;
-  }
-  @media (max-width: 1030px) {
-    left: 15%;
   }
 `;
 
@@ -147,8 +144,7 @@ const TagSearch = styled.select`
 const SearchLabel = styled.label`
   font-size: 32px;
   padding: 20px;
-  color: black;
-  text-shadow: 2px 2px white;
+  color: white;
   z-index: 1;
 `;
 const SearchInput = styled.input`

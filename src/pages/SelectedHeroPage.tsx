@@ -55,9 +55,9 @@ const SelectedHeroPage: React.FC = () => {
       }
     };
     fetchVersion();
-    getCurrentHero();
+    Object.keys(hero).length === 0 && getCurrentHero();
     getAllUrlsForSkins();
-  }, [version, hero.skins, hero.image, currentSkin]);
+  }, [version, hero.image, hero.skins, currentSkin, hero]);
 
   const displayNextImage = () => {
     let x: number =
@@ -102,7 +102,7 @@ const SelectedHeroPage: React.FC = () => {
             <h4 className="text-center">{hero.lore}</h4>
             <Tags>
               {hero.tags?.map((tag) => (
-                <Tag key={Math.random() * 100}>{tag}</Tag>
+                <Tag key={tag}>{tag}</Tag>
               ))}
             </Tags>
             <StatsSection>
@@ -188,6 +188,7 @@ const Title = styled.h1`
 `;
 
 const SelectedHero = styled.div`
+  background-color: black;
   background-image: url(${() =>
     `http://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
       window.location.pathname.split("/")[1]
