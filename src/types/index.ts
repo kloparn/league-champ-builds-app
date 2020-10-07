@@ -138,4 +138,5 @@ export interface HeroStats {
       resource?: string;
     }
   ];
+  version: string;
 }

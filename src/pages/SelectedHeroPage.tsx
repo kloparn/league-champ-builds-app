@@ -68,7 +68,6 @@ const SelectedHeroPage: React.FC = () => {
         ? 0
         : skinUrls.indexOf(currentSkin) + 1;
     setCurrentSkin(skinUrls[x]);
-    console.log(currentSkin);
   };
 
   const displayPreviousImage = () => {
@@ -77,10 +76,7 @@ const SelectedHeroPage: React.FC = () => {
         ? skinUrls.length - 1
         : skinUrls.indexOf(currentSkin) - 1;
     setCurrentSkin(skinUrls[x]);
-    console.log(currentSkin);
   };
-
-  console.log(hero);
 
   return (
     <SelectedHero>
@@ -110,7 +106,10 @@ const SelectedHeroPage: React.FC = () => {
                 <Tag key={tag}>{tag}</Tag>
               ))}
             </Tags>
-            <AbilityContainer spells={hero.spells!}></AbilityContainer>
+            <AbilityContainer
+              spells={hero.spells!}
+              version={version}
+            ></AbilityContainer>
             <StatsSection>
               <ParagrahpBox>
                 <br />

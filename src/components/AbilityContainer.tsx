@@ -2,24 +2,17 @@ import React from "react";
 import { HeroStats } from "../types/index";
 import styled from "styled-components";
 
-const AbilityContainer = (stats: HeroStats, version: string) => {
-  const { spells } = stats;
+const AbilityContainer: React.FC<HeroStats> = (props) => {
+  const { spells, version } = props;
 
   console.log(version);
-
-  const filterString = (str: string, replace: string, replaceWith: string) => {
-    console.log(str);
-    str.includes(replace) &&
-      filterString(str.replace(replace, replaceWith), replace, replaceWith);
-    return str;
-  };
 
   return (
     <SpellContainer>
       {spells?.map((spell) => (
         <SpellWrapper key={spell.id}>
           <p>{spell.name}</p>
-          <p>{filterString(spell.description!, "<br>", "")}</p>
+          <p dangerouslySetInnerHTML={{ __html: spell.description! }}></p>
         </SpellWrapper>
       ))}
     </SpellContainer>
