@@ -106,9 +106,11 @@ const SelectedHeroPage: React.FC = () => {
                 <Tag key={tag}>{tag}</Tag>
               ))}
             </Tags>
+            {console.log("herro passive: " + JSON.stringify(hero.passive))}
             <AbilityContainer
               spells={hero.spells!}
               version={version}
+              passive={hero.passive!}
             ></AbilityContainer>
             <StatsSection>
               <ParagrahpBox>

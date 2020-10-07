@@ -90,6 +90,19 @@ export interface Hero {
       resource: string;
     }
   ];
+  passive?: {
+    name: string;
+    description: string;
+    image: {
+      full: string;
+      sprite: string;
+      group: string;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    };
+  };
 }
 
 export interface HeroWrapper {
@@ -134,5 +147,18 @@ export interface HeroStats {
       resource?: string;
     }
   ];
-  version: string;
+  version?: string;
+  passive?: {
+    name: string;
+    description: string;
+    image: {
+      full: string;
+      sprite: string;
+      group: string;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    };
+  };
 }
