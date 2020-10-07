@@ -78,17 +78,15 @@ export interface Hero {
       maxammo: string;
       range: [number];
       rangeBurn: string;
-      image: [
-        {
-          full: string;
-          sprite: string;
-          group: string;
-          x: number;
-          y: number;
-          w: number;
-          h: number;
-        }
-      ];
+      image: {
+        full: string;
+        sprite: string;
+        group: string;
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+      };
       resource: string;
     }
   ];
@@ -124,17 +122,15 @@ export interface HeroStats {
       maxammo?: string;
       range?: [number];
       rangeBurn?: string;
-      image?: [
-        {
-          full: string;
-          sprite: string;
-          group: string;
-          x: number;
-          y: number;
-          w: number;
-          h: number;
-        }
-      ];
+      image?: {
+        full: string;
+        sprite: string;
+        group: string;
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+      };
       resource?: string;
     }
   ];

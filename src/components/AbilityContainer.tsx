@@ -5,19 +5,38 @@ import styled from "styled-components";
 const AbilityContainer: React.FC<HeroStats> = (props) => {
   const { spells, version } = props;
 
-  console.log(version);
+  const spellUrl = `http://ddragon.leagueoflegends.com/cdn/${version}/img/spell/`;
 
   return (
     <SpellContainer>
       {spells?.map((spell) => (
         <SpellWrapper key={spell.id}>
-          <p>{spell.name}</p>
+          <SpellHeaderContainer>
+            <AbilityImage
+              src={`${spellUrl}${spell.image?.full}`}
+              alt={spell.name}
+            ></AbilityImage>
+            <p>{spell.name}</p>
+          </SpellHeaderContainer>
           <p dangerouslySetInnerHTML={{ __html: spell.description! }}></p>
+          <p> hello</p>
         </SpellWrapper>
       ))}
     </SpellContainer>
   );
 };
+
+const AbilityImage = styled.img`
+  width: 5rem;
+  height: 5rem;
+`;
+
+const SpellHeaderContainer = styled.section`
+  margin: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
 
 const SpellWrapper = styled.div`
   display: flex;
