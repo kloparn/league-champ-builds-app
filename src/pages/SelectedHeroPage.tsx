@@ -3,8 +3,11 @@ import styled from "styled-components";
 import { Hero } from "../types";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
-import DifficultyBar from "../components/DifficultyBar";
-import DynamicStatGiver from "../components/DynamicStatGiver";
+import {
+  DifficultyBar,
+  DynamicStatGiver,
+  AbilityContainer,
+} from "../components";
 
 const SelectedHeroPage: React.FC = () => {
   const [hero, setHero] = useState({} as Hero);
@@ -77,6 +80,8 @@ const SelectedHeroPage: React.FC = () => {
     console.log(currentSkin);
   };
 
+  console.log(hero);
+
   return (
     <SelectedHero>
       <BackNavLink to="/">Back</BackNavLink>
@@ -105,6 +110,7 @@ const SelectedHeroPage: React.FC = () => {
                 <Tag key={tag}>{tag}</Tag>
               ))}
             </Tags>
+            <AbilityContainer spells={hero.spells!}></AbilityContainer>
             <StatsSection>
               <ParagrahpBox>
                 <br />

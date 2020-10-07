@@ -53,8 +53,89 @@ export interface Hero {
       chromas: boolean;
     }
   ];
+  spells?: [
+    {
+      id: string;
+      name: string;
+      description: string;
+      tooltip: string;
+      leveltip: [
+        {
+          label: [string];
+          effect: [string];
+        }
+      ];
+      maxrank: number;
+      cooldown: [number];
+      cooldownBurn: string;
+      cost: [number];
+      costBurn: string;
+      datavalues: Object;
+      effect: [[number]];
+      effectBurn: [string];
+      vars: [string];
+      costType: string;
+      maxammo: string;
+      range: [number];
+      rangeBurn: string;
+      image: [
+        {
+          full: string;
+          sprite: string;
+          group: string;
+          x: number;
+          y: number;
+          w: number;
+          h: number;
+        }
+      ];
+      resource: string;
+    }
+  ];
 }
 
 export interface HeroWrapper {
   [name: string]: Hero;
+}
+
+export interface HeroStats {
+  spells?: [
+    {
+      id?: string;
+      name?: string;
+      description?: string;
+      tooltip?: string;
+      leveltip?: [
+        {
+          label: [string];
+          effect: [string];
+        }
+      ];
+      maxrank?: number;
+      cooldown?: [number];
+      cooldownBurn?: string;
+      cost?: [number];
+      costBurn?: string;
+      datavalues?: Object;
+      effect?: [[number]];
+      effectBurn?: [string];
+      vars?: [string];
+      costType?: string;
+      maxammo?: string;
+      range?: [number];
+      rangeBurn?: string;
+      image?: [
+        {
+          full: string;
+          sprite: string;
+          group: string;
+          x: number;
+          y: number;
+          w: number;
+          h: number;
+        }
+      ];
+      resource?: string;
+    }
+  ];
 }

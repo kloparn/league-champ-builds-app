@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { HeroWrapper } from "../types";
 import styled from "styled-components";
-import HeroCard from "../components/HeroCard";
+import { HeroCard } from "../components";
 import axios from "axios";
 
 const HeroCollectionPage = () => {
