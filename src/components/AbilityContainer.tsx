@@ -12,6 +12,9 @@ const AbilityContainer: React.FC<HeroStats> = (props) => {
     <SpellSection>
       <PassiveHeaderContainer>
         <SpellHeaderContainer>
+          <WhiteBorder>
+            <PassiveInfo>Passive</PassiveInfo>
+          </WhiteBorder>
           <AbilityImage src={`${passiveUrl}${passive?.image.full}`} />
           <FillParagrahp>{passive?.name}</FillParagrahp>
         </SpellHeaderContainer>
@@ -39,11 +42,27 @@ const AbilityContainer: React.FC<HeroStats> = (props) => {
   );
 };
 
+const WhiteBorder = styled.div`
+  border: 2px solid white;
+  min-height: 100%;
+  width: 5rem;
+  height: 5rem;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+`;
+
+const PassiveInfo = styled.h1``;
+
 const PassiveHeaderContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 50%;
+  width: 70%;
+  @media (max-width: 900px) {
+    flex-flow: wrap;
+  }
 `;
 
 const FillParagrahp = styled.p`
@@ -59,8 +78,8 @@ const AbilityImage = styled.img`
 const SpellHeaderContainer = styled.section`
   margin: 1rem;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 `;
 
 const SpellWrapper = styled.div`
@@ -69,6 +88,12 @@ const SpellWrapper = styled.div`
   flex-direction: row;
   min-width: 25vh;
   max-width: 70vh;
+
+  @media (max-width: 900px) {
+    justify-content: center;
+    flex-flow: wrap;
+    text-align: center;
+  }
 `;
 
 const SpellContainer = styled.div`
