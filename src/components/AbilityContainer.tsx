@@ -3,7 +3,7 @@ import { HeroStats } from "../types/index";
 import styled from "styled-components";
 
 const AbilityContainer: React.FC<HeroStats> = (props) => {
-  const { spells, version, passive } = props;
+  const { spells, version, passive, partype } = props;
 
   const spellUrl = `http://ddragon.leagueoflegends.com/cdn/${version}/img/spell/`;
   const passiveUrl = `http://ddragon.leagueoflegends.com/cdn/${version}/img/passive/`;
@@ -24,23 +24,58 @@ const AbilityContainer: React.FC<HeroStats> = (props) => {
       </PassiveHeaderContainer>
       <SpellContainer>
         {spells?.map((spell) => (
-          <SpellWrapper key={spell.id}>
-            <SpellHeaderContainer>
-              <AbilityImage
-                src={`${spellUrl}${spell.image?.full}`}
-                alt={spell.name}
-              ></AbilityImage>
-              <FillParagrahp>{spell.name}</FillParagrahp>
-            </SpellHeaderContainer>
-            <FillParagrahp
-              dangerouslySetInnerHTML={{ __html: spell.description! }}
-            ></FillParagrahp>
-          </SpellWrapper>
+          <div key={spell.id}>
+            <SpellWrapper>
+              <SpellHeaderContainer>
+                <AbilityImage
+                  src={`${spellUrl}${spell.image?.full}`}
+                  alt={spell.name}
+                ></AbilityImage>
+                <FillParagrahp>{spell.name}</FillParagrahp>
+                <WhiteLineRight />
+              </SpellHeaderContainer>
+              <SpellInfo>
+                <FillParagrahp
+                  dangerouslySetInnerHTML={{ __html: spell.description! }}
+                ></FillParagrahp>
+                <FillParagrahp
+                  dangerouslySetInnerHTML={{ __html: spell.tooltip! }}
+                ></FillParagrahp>
+              </SpellInfo>
+            </SpellWrapper>
+            <Container>
+              <p>
+                CD: <strong> [{spell.cooldownBurn!}]</strong>
+              </p>
+              <p>
+                <strong>[{spell.costBurn}]</strong> {partype}{" "}
+              </p>
+            </Container>
+            <WhiteLineBottom />
+          </div>
         ))}
       </SpellContainer>
     </SpellSection>
   );
 };
+
+const SpellInfo = styled.div``;
+
+const WhiteLineRight = styled.div`
+  border-right: 2px solid white;
+`;
+
+const WhiteLineBottom = styled.div`
+  border-bottom: 2px solid white;
+`;
+
+const Container = styled.div`
+  display: flex;
+  font-size: 1.1rem;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-flow: wrap;
+`;
 
 const WhiteBorder = styled.div`
   border: 2px solid white;

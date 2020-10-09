@@ -161,4 +161,5 @@ export interface HeroStats {
       h: number;
     };
   };
+  partype?: string;
 }

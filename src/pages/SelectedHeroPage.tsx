@@ -110,6 +110,7 @@ const SelectedHeroPage: React.FC = () => {
               spells={hero.spells!}
               version={version}
               passive={hero.passive!}
+              partype={hero.partype!}
             ></AbilityContainer>
             <StatsSection>
               <ParagrahpBox>
