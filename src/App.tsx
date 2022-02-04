@@ -4,7 +4,7 @@ import {
   SelectedHeroPage as SelectedPage,
 } from "./pages";
 import { Footer } from "./components";
-import "./App.css";
+import "./stylesheets/App.css";
 import styled, { ThemeProvider } from "styled-components";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
