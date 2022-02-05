@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { HeroWrapper } from "../types";
 import styled from "styled-components";
 import { HeroCard } from "../components";
-import axios from "axios";
 
 const HeroCollectionPage = () => {
   const [champions, setChampions] = useState({} as HeroWrapper);
@@ -10,23 +9,23 @@ const HeroCollectionPage = () => {
   const [version, setVersion] = useState("");
   const [tag, setTag] = useState("");
 
+  // Getting the newest api version from the api itself.
   useEffect(() => {
-    const fetchVersion = async () => {
-      const res = await axios.get(
-        "https://ddragon.leagueoflegends.com/api/versions.json"
-      );
-      const data = res.data;
-      setVersion(data[0]);
-    };
-    const fetchHeroes = async () => {
-      const res = await axios.get(
-        `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`
-      );
-      const data = res.data;
-      setChampions(data.data);
-    };
-    fetchVersion();
-    fetchHeroes();
+    fetch("https://ddragon.leagueoflegends.com/api/versions.json")
+      .then((response) => response.json())
+      .then((data) => {
+        setVersion(data[0])
+      });
+  }, [version]);
+
+  useEffect(() => {
+    if (version !== "") {
+      fetch( `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`)
+        .then((response) => response.json())
+        .then((data) => {
+          setChampions(data.data);
+        })
+    }
   }, [version]);
 
   const contains = (tags: [string], pickedTag: string) => {
@@ -42,8 +41,6 @@ const HeroCollectionPage = () => {
     });
     return tempExists;
   };
-
-  console.log("main page");
 
   return (
     <Collection className="searchbar">

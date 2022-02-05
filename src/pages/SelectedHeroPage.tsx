@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Hero } from "../types";
 import { NavLink } from "react-router-dom";
-import axios from "axios";
 import {
   DifficultyBar,
   DynamicStatGiver,
@@ -15,52 +14,40 @@ const SelectedHeroPage: React.FC = () => {
   const [currentSkin, setCurrentSkin] = useState("");
   const [version, setVersion] = useState("");
 
-  useEffect(() => {
-    const fetchVersion = async () => {
-      const res = await axios.get(
-        "https://ddragon.leagueoflegends.com/api/versions.json"
-      );
-      const data = res.data;
-      setVersion(data[0]);
-    };
-    const getCurrentHero = async () => {
-      const res = await axios.get(
-        `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion/${
-          window.location.pathname.split("/")[1]
-        }.json`
-      );
-      const data = res.data;
-      setHero(data.data[window.location.pathname.split("/")[1]]);
-    };
 
-    const getAllUrlsForSkins = () => {
-      let idArr = [] as number[];
-      hero.skins?.forEach((e) => {
-        if (e.name !== "default") {
-          idArr.push(e.num);
-        }
+  // Getting the newest api version from the api itself.
+  useEffect(() => {
+    fetch("https://ddragon.leagueoflegends.com/api/versions.json")
+      .then((response) => response.json())
+      .then((data) => {
+        setVersion(data[0])
       });
-      if (idArr.length > 0) {
-        let urls = [
-          `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
-            hero.image?.full.split(".")[0]
-          }_0.jpg`,
-        ];
-        for (let i = 0; i < idArr.length; i++) {
-          urls.push(
-            `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
-              hero.image?.full.split(".")[0]
-            }_${idArr[i]}.jpg`
-          );
-        }
-        setSkinUrls(urls);
-        if (currentSkin === "") setCurrentSkin(urls[0]);
-      }
-    };
-    fetchVersion();
-    Object.keys(hero).length === 0 && getCurrentHero();
-    getAllUrlsForSkins();
-  }, [version, hero.image, hero.skins, currentSkin, hero]);
+  }, [version]);
+
+  // Getting the hero and setting relevant information about the champ like skin and other stuff.
+  useEffect(() => {
+    if (version !== "" && skinUrls.length === 0) {
+      fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion/${window.location.pathname.split("/")[1]}.json`)
+        .then((response) => response.json())
+        .then((data) => {
+          const _hero : Hero = data.data[window.location.pathname.split("/")[1]]
+          setHero(_hero);
+          
+          const skinIdArray = _hero.skins?.filter((skin) => skin.name !== "default")
+            .map((skin) => skin.num);
+          
+          const skinUrls = [`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${_hero.image?.full.split(".")[0]}_0.jpg`];
+
+          skinIdArray?.forEach((skinId) => {
+            skinUrls.push(`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${_hero.image?.full.split(".")[0]}_${skinId}.jpg`);
+          });
+
+          setSkinUrls(skinUrls);
+          if (currentSkin === "") setCurrentSkin(skinUrls[0]);
+        });
+    }
+  }, [version, currentSkin, skinUrls.length])
+
 
   const displayNextImage = () => {
     let x: number =
@@ -78,9 +65,6 @@ const SelectedHeroPage: React.FC = () => {
     setCurrentSkin(skinUrls[x]);
   };
 
-
-  console.debug({hero});
-  //Ahri throws then pulls back her orb, dealing <magicDamage>{{ totaldamage }} magic damage</magicDamage> on the way out and <trueDamage>{{ totaldamage }} true damage</trueDamage> on the way back.
   return (
     <SelectedHero>
       <BackNavLink to="/">Back</BackNavLink>
@@ -200,8 +184,7 @@ const Title = styled.h1`
 const SelectedHero = styled.div`
   background-color: black;
   background-image: url(${() =>
-    `http://ddragon.leagueoflegends.com/cdn/img/champion/splash/${
-      window.location.pathname.split("/")[1]
+    `http://ddragon.leagueoflegends.com/cdn/img/champion/splash/${window.location.pathname.split("/")[1]
     }_0.jpg`});
   background-size: cover;
   background-attachment: fixed;

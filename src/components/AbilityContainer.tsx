@@ -15,7 +15,7 @@ const AbilityContainer: React.FC<HeroStats> = (props) => {
           <WhiteBorder>
             <PassiveInfo>Passive</PassiveInfo>
           </WhiteBorder>
-          <AbilityImage src={`${passiveUrl}${passive?.image.full}`} />
+          <AbilityImage src={`${ passive?.image.full !== undefined ? passiveUrl + passive?.image.full : ""}`} />
           <FillParagrahp>{passive?.name}</FillParagrahp>
         </SpellHeaderContainer>
         <FillParagrahp
