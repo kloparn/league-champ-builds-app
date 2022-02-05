@@ -35,7 +35,7 @@ const SelectedHeroPage: React.FC = () => {
 
     const getAllUrlsForSkins = () => {
       let idArr = [] as number[];
-      hero.skins?.map((e) => {
+      hero.skins?.forEach((e) => {
         if (e.name !== "default") {
           idArr.push(e.num);
         }
@@ -78,6 +78,9 @@ const SelectedHeroPage: React.FC = () => {
     setCurrentSkin(skinUrls[x]);
   };
 
+
+  console.debug({hero});
+  //Ahri throws then pulls back her orb, dealing <magicDamage>{{ totaldamage }} magic damage</magicDamage> on the way out and <trueDamage>{{ totaldamage }} true damage</trueDamage> on the way back.
   return (
     <SelectedHero>
       <BackNavLink to="/">Back</BackNavLink>
