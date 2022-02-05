@@ -184,7 +184,7 @@ const Title = styled.h1`
 const SelectedHero = styled.div`
   background-color: black;
   background-image: url(${() =>
-    `http://ddragon.leagueoflegends.com/cdn/img/champion/splash/${window.location.pathname.split("/")[1]
+    `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${window.location.pathname.split("/")[1]
     }_0.jpg`});
   background-size: cover;
   background-attachment: fixed;

@@ -5,8 +5,8 @@ import styled from "styled-components";
 const AbilityContainer: React.FC<HeroStats> = (props) => {
   const { spells, version, passive, partype } = props;
 
-  const spellUrl = `http://ddragon.leagueoflegends.com/cdn/${version}/img/spell/`;
-  const passiveUrl = `http://ddragon.leagueoflegends.com/cdn/${version}/img/passive/`;
+  const spellUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/`;
+  const passiveUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/img/passive/`;
 
   return (
     <SpellSection>
