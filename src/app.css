@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: theme('colors.hex.void');
+    color: theme('colors.hex.parchment');
+    font-family: theme('fontFamily.sans');
+  }
+
+  h1, h2, h3, h4 {
+    font-family: theme('fontFamily.display');
+    letter-spacing: 0.01em;
+  }
+
+  ::selection {
+    background: theme('colors.hex.gold');
+    color: theme('colors.hex.void');
+  }
+}
+
+@layer components {
+  .hex-frame {
+    @apply relative border border-hex-border bg-hex-panel/80 backdrop-blur-sm;
+  }
+
+  .hex-button {
+    @apply inline-flex items-center justify-center rounded-sm border border-hex-gold/60 bg-transparent px-4 py-2
+           font-display text-sm uppercase tracking-widest text-hex-gold
+           transition-all duration-200
+           hover:border-hex-goldHi hover:bg-hex-gold/10 hover:text-hex-goldHi
+           focus:outline-none focus:ring-2 focus:ring-hex-cyan/60;
+  }
+
+  .hex-input {
+    @apply w-full rounded-sm border border-hex-border bg-hex-shadow/80 px-4 py-2 text-hex-parchment
+           placeholder:text-hex-mist/60
+           focus:border-hex-cyan focus:outline-none focus:ring-1 focus:ring-hex-cyan;
+  }
+
+}
+
+.ddragon-html font[color] {
+  color: theme('colors.hex.cyan');
+}
+
+.ddragon-html strong,
+.ddragon-html b {
+  color: theme('colors.hex.gold');
+}
+
+.ddragon-html magicdamage,
+.ddragon-html magicDamage {
+  color: theme('colors.hex.cyan');
+}
+
+.ddragon-html physicaldamage,
+.ddragon-html physicalDamage {
+  color: #FF8C42;
+}
+
+.ddragon-html truedamage,
+.ddragon-html trueDamage {
+  color: theme('colors.hex.goldHi');
+}
+
+.ddragon-html status {
+  color: #E8C547;
+}
+
+.ddragon-html keywordmajor,
+.ddragon-html keywordMajor,
+.ddragon-html keyword {
+  color: theme('colors.hex.gold');
+}
+
+.ddragon-html spellpassive,
+.ddragon-html spellPassive,
+.ddragon-html spellactive,
+.ddragon-html spellActive {
+  color: theme('colors.hex.gold');
+  font-weight: 600;
+}
