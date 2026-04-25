@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:leaguechampbuilds.netlify.app)",
+      "Bash(npm --version)",
+      "Bash(grep -E '\\($lib|$app|@sveltejs\\)')",
+      "Bash(npm run *)"
+    ]
+  }
+}
