@@ -1,0 +1,84 @@
+[
+  {
+    "id": 8000,
+    "key": "Precision",
+    "icon": "perk-images/Styles/7201_Precision.png",
+    "name": "Precision",
+    "slots": [
+      {
+        "runes": [
+          {
+            "id": 8005,
+            "key": "PressTheAttack",
+            "icon": "perk-images/Styles/Precision/PressTheAttack/PressTheAttack.png",
+            "name": "Press the Attack",
+            "shortDesc": "",
+            "longDesc": ""
+          },
+          {
+            "id": 8010,
+            "key": "Conqueror",
+            "icon": "perk-images/Styles/Precision/Conqueror/Conqueror.png",
+            "name": "Conqueror",
+            "shortDesc": "",
+            "longDesc": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 8100,
+    "key": "Domination",
+    "icon": "perk-images/Styles/7200_Domination.png",
+    "name": "Domination",
+    "slots": [
+      {
+        "runes": [
+          {
+            "id": 8112,
+            "key": "Electrocute",
+            "icon": "perk-images/Styles/Domination/Electrocute/Electrocute.png",
+            "name": "Electrocute",
+            "shortDesc": "",
+            "longDesc": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 8200,
+    "key": "Sorcery",
+    "icon": "perk-images/Styles/7202_Sorcery.png",
+    "name": "Sorcery",
+    "slots": [
+      {
+        "runes": [
+          {
+            "id": 8230,
+            "key": "PhaseRush",
+            "icon": "perk-images/Styles/Sorcery/PhaseRush/PhaseRush.png",
+            "name": "Phase Rush",
+            "shortDesc": "",
+            "longDesc": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 8300,
+    "key": "Inspiration",
+    "icon": "perk-images/Styles/7203_Whimsy.png",
+    "name": "Inspiration",
+    "slots": [{ "runes": [] }]
+  },
+  {
+    "id": 8400,
+    "key": "Resolve",
+    "icon": "perk-images/Styles/7204_Resolve.png",
+    "name": "Resolve",
+    "slots": [{ "runes": [] }]
+  }
+]

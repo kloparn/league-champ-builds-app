@@ -1,0 +1,45 @@
+{
+  "type": "champion",
+  "format": "standAloneComplex",
+  "version": "15.10.1",
+  "data": {
+    "Amumu": {
+      "id": "Amumu",
+      "key": "32",
+      "name": "Amumu",
+      "title": "the Sad Mummy",
+      "blurb": "Legend claims that Amumu is a lonely and melancholy soul...",
+      "info": { "attack": 2, "defense": 6, "magic": 8, "difficulty": 3 },
+      "image": {
+        "full": "Amumu.png",
+        "sprite": "champion0.png",
+        "group": "champion",
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "tags": ["Tank", "Mage"],
+      "partype": "MP"
+    },
+    "Ahri": {
+      "id": "Ahri",
+      "key": "103",
+      "name": "Ahri",
+      "title": "the Nine-Tailed Fox",
+      "blurb": "Innately connected to the latent power of Runeterra...",
+      "info": { "attack": 3, "defense": 4, "magic": 8, "difficulty": 5 },
+      "image": {
+        "full": "Ahri.png",
+        "sprite": "champion0.png",
+        "group": "champion",
+        "x": 48,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "tags": ["Mage", "Assassin"],
+      "partype": "MP"
+    }
+  }
+}

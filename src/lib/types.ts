@@ -86,6 +86,44 @@ export interface ChampionDetail extends ChampionSummary {
   enemytips: string[];
 }
 
+export interface Item {
+  id: string;
+  name: string;
+  gold: { total: number; purchasable: boolean };
+  tags: string[];
+  into?: string[];
+  maps?: Record<string, boolean>;
+}
+
+export interface SummonerSpell {
+  id: string;
+  name: string;
+  description: string;
+  key: string;
+  image: ChampionImage;
+}
+
+export interface Rune {
+  id: number;
+  key: string;
+  icon: string;
+  name: string;
+  shortDesc: string;
+  longDesc: string;
+}
+
+export interface RuneSlot {
+  runes: Rune[];
+}
+
+export interface RuneStyle {
+  id: number;
+  key: string;
+  icon: string;
+  name: string;
+  slots: RuneSlot[];
+}
+
 export type ChampionRole = 'Fighter' | 'Tank' | 'Support' | 'Mage' | 'Assassin' | 'Marksman';
 
 export const CHAMPION_ROLES: readonly ChampionRole[] = [

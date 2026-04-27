@@ -1,0 +1,43 @@
+{
+  "type": "item",
+  "version": "15.10.1",
+  "data": {
+    "1001": {
+      "name": "Boots",
+      "gold": { "total": 300, "purchasable": true },
+      "tags": ["Boots"],
+      "into": ["3009", "3047", "3020", "3158", "3111", "3117", "3006"]
+    },
+    "1056": {
+      "name": "Doran's Ring",
+      "gold": { "total": 450, "purchasable": true },
+      "tags": ["Mana", "ManaRegen", "Lane", "Health"]
+    },
+    "3020": {
+      "name": "Sorcerer's Shoes",
+      "gold": { "total": 1100, "purchasable": true },
+      "tags": ["Boots", "MagicPenetration"]
+    },
+    "3157": {
+      "name": "Zhonya's Hourglass",
+      "gold": { "total": 3250, "purchasable": true },
+      "tags": ["Armor", "AbilityPower", "Active"]
+    },
+    "3340": {
+      "name": "Stealth Ward",
+      "gold": { "total": 0, "purchasable": false },
+      "tags": ["Trinket", "Vision"]
+    },
+    "2003": {
+      "name": "Health Potion",
+      "gold": { "total": 50, "purchasable": true },
+      "tags": ["Consumable", "Health"]
+    },
+    "1026": {
+      "name": "Blasting Wand",
+      "gold": { "total": 850, "purchasable": true },
+      "tags": ["AbilityPower"],
+      "into": ["3157", "3089"]
+    }
+  }
+}

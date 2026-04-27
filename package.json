@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.7.0"
   },
   "scripts": {
     "dev": "vite dev",
@@ -14,7 +14,10 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "npm run test:unit -- --run && npm run test:e2e",
     "test:unit": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "refresh:builds": "node --experimental-strip-types --env-file-if-exists=.env scripts/refresh-builds.ts",
+    "refresh:builds:fast": "node --experimental-strip-types --env-file-if-exists=.env scripts/refresh-builds.ts --fast",
+    "refresh:builds:github": "node --experimental-strip-types --env-file-if-exists=.env scripts/refresh-builds.ts --github"
   },
   "overrides": {
     "cookie": "^0.7.2",
