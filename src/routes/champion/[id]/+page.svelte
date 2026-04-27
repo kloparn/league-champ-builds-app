@@ -137,6 +137,7 @@
               patch={data.buildsMeta.patch}
               generatedAt={data.buildsMeta.generatedAt}
               tiers={data.buildsMeta.tiers}
+              championSpells={c.spells}
               summonerSpells={data.summonerSpells}
               runeStyles={data.runeStyles}
               items={data.items}

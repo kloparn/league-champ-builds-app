@@ -54,12 +54,12 @@ const GITHUB = process.argv.includes('--github');
 const MODES: Record<'fast' | 'default' | 'github', ModeConfig> = {
   fast: {
     tiers: [
-      { tier: 'CHALLENGER', limit: 5 },
-      { tier: 'GRANDMASTER', limit: 5 },
-      { tier: 'MASTER', limit: 5 },
-      { tier: 'DIAMOND', division: 'I', limit: 5 }
+      { tier: 'CHALLENGER', limit: 10 },
+      { tier: 'GRANDMASTER', limit: 10 },
+      { tier: 'MASTER', limit: 10 },
+      { tier: 'DIAMOND', division: 'I', limit: 10 }
     ],
-    matchesPerSummoner: 5
+    matchesPerSummoner: 10
   },
   default: {
     tiers: [
@@ -72,8 +72,8 @@ const MODES: Record<'fast' | 'default' | 'github', ModeConfig> = {
     tiers: [
       { tier: 'CHALLENGER', limit: 300 },
       { tier: 'GRANDMASTER', limit: 700 },
-      { tier: 'MASTER', limit: 500 },
-      { tier: 'DIAMOND', division: 'I', limit: 500 }
+      { tier: 'MASTER', limit: 1000 },
+      { tier: 'DIAMOND', division: 'I', limit: 1000 }
     ],
     matchesPerSummoner: 50
   }

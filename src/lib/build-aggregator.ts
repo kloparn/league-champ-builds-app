@@ -25,6 +25,7 @@ export interface MatchParticipant {
       description: string;
       selections: Array<{ perk: number; var1: number; var2: number; var3: number }>;
     }>;
+    statPerks?: { offense: number; flex: number; defense: number };
   };
   summoner1Id: number;
   summoner2Id: number;
@@ -49,6 +50,14 @@ export type TimelineEvent =
       participantId: number;
       beforeId: number;
       afterId: number;
+    }
+  | {
+      type: 'SKILL_LEVEL_UP';
+      timestamp: number;
+      participantId: number;
+      /** 1=Q, 2=W, 3=E, 4=R */
+      skillSlot: number;
+      levelUpType?: string;
     }
   | { type: string; timestamp: number; participantId?: number; [key: string]: unknown };
 
@@ -76,10 +85,23 @@ export interface ItemEntry {
 
 export interface RuneSetup {
   primaryStyle: number;
-  subStyle: number;
   keystone: number;
+  /** 3 minor primary tree perks, in selection order. */
+  primaryMinors: number[];
+  subStyle: number;
+  /** 2 secondary tree perks, in selection order. */
+  subRunes: number[];
+  /** 3 stat shards: [offense, flex, defense]. May be 0 if unavailable. */
+  statShards: [number, number, number];
   count: number;
   winrate: number;
+}
+
+export interface SkillSlotPick {
+  /** 1=Q, 2=W, 3=E, 4=R, or 0 if no data. */
+  slot: number;
+  /** Fraction of matches that picked this slot at this level. */
+  pickRate: number;
 }
 
 export interface SpellPair {
@@ -100,6 +122,8 @@ export interface RoleBuildStats {
   topBoots: ItemEntry[];
   topRunes: RuneSetup[];
   topSummonerSpells: SpellPair[];
+  /** Per-level (1..18) modal skill pick. May be empty if no timeline data. */
+  skillOrder: SkillSlotPick[];
 }
 
 export interface ChampionBuildStats {
@@ -166,12 +190,19 @@ interface RoleBucket {
   bootsPicked: number;
   runes: Map<string, RuneBucketEntry>;
   spells: Map<string, SpellBucketEntry>;
+  /** skillSlotsByLevel[level-1] = Map<slot, count>. 18 entries. */
+  skillSlotsByLevel: Array<Map<number, number>>;
+  /** How many participants reached each level in this role bucket. */
+  skillLevelReached: number[];
 }
 
 interface RuneBucketEntry {
   primaryStyle: number;
-  subStyle: number;
   keystone: number;
+  primaryMinors: number[];
+  subStyle: number;
+  subRunes: number[];
+  statShards: [number, number, number];
   count: number;
   wins: number;
 }
@@ -209,10 +240,15 @@ interface SerializedRoleBucket {
   pathSlotReached: number[];
   boots: Record<string, [number, number]>;
   bootsPicked: number;
-  /** key "primaryStyle-subStyle-keystone" -> [count, wins] */
+  /** Full rune key
+   * "primary-keystone-pm1-pm2-pm3-sub-sr1-sr2-statOff-statFlex-statDef" -> [count, wins].
+   * Key encodes everything needed to deserialize. */
   runes: Record<string, [number, number]>;
   /** key "spell1-spell2" (sorted) -> [count, wins] */
   spells: Record<string, [number, number]>;
+  /** Per level (1..18), slot -> count. Empty array if no timeline data was seen. */
+  skillSlotsByLevel: Array<Record<string, number>>;
+  skillLevelReached: number[];
 }
 
 const ITEM_SLOTS_FINAL = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5'] as const;
@@ -287,6 +323,10 @@ export function addMatchToState(
 
     addRune(roleBucket, p);
     addSpells(roleBucket, p);
+
+    if (timeline) {
+      addSkillOrder(roleBucket, i + 1, timeline, p.win);
+    }
   }
 }
 
@@ -325,7 +365,8 @@ export function finalizeState(state: BucketState, options: FinalizeOptions): Bui
         itemPath: rankPath(rb, topPerSlot),
         topBoots: rankBoots(rb, 3),
         topRunes: rankRunes(rb, topRunesN),
-        topSummonerSpells: rankSpells(rb, topSpellsN)
+        topSummonerSpells: rankSpells(rb, topSpellsN),
+        skillOrder: rankSkillOrder(rb)
       };
     }
 
@@ -364,7 +405,9 @@ export function serializeBucketState(state: BucketState, pathSlots = 4): Seriali
         boots: serializeCountMap(rb.boots),
         bootsPicked: rb.bootsPicked,
         runes: serializeRuneMap(rb.runes),
-        spells: serializeSpellMap(rb.spells)
+        spells: serializeSpellMap(rb.spells),
+        skillSlotsByLevel: rb.skillSlotsByLevel.map(serializeSkillLevelMap),
+        skillLevelReached: [...rb.skillLevelReached]
       };
     }
     champions[String(championId)] = {
@@ -392,7 +435,15 @@ export function deserializeBucketState(serialized: SerializedBucketState): Bucke
         boots: deserializeCountMap(sr.boots),
         bootsPicked: sr.bootsPicked,
         runes: deserializeRuneMap(sr.runes),
-        spells: deserializeSpellMap(sr.spells)
+        spells: deserializeSpellMap(sr.spells),
+        skillSlotsByLevel: (sr.skillSlotsByLevel ?? []).map(deserializeSkillLevelMap).concat(
+          // Pad to MAX_LEVEL if older state file has fewer entries.
+          Array.from(
+            { length: Math.max(0, MAX_LEVEL - (sr.skillSlotsByLevel?.length ?? 0)) },
+            () => new Map<number, number>()
+          )
+        ),
+        skillLevelReached: padArray(sr.skillLevelReached ?? [], MAX_LEVEL, 0)
       });
     }
     state.set(parseInt(championIdStr, 10), {
@@ -433,16 +484,48 @@ function serializeRuneMap(map: Map<string, RuneBucketEntry>): Record<string, [nu
 function deserializeRuneMap(obj: Record<string, [number, number]>): Map<string, RuneBucketEntry> {
   const map = new Map<string, RuneBucketEntry>();
   for (const [key, [count, wins]] of Object.entries(obj)) {
-    const [primary, sub, keystone] = key.split('-').map((n) => parseInt(n, 10));
+    const parts = key.split('-').map((n) => parseInt(n, 10));
+    // New 11-segment key: primary, keystone, pm1, pm2, pm3, sub, sr1, sr2, off, flex, def
+    const isFullKey = parts.length >= 11;
+    const primary = parts[0] ?? 0;
+    const keystone = isFullKey ? (parts[1] ?? 0) : (parts[2] ?? 0);
+    const primaryMinors = isFullKey ? [parts[2] ?? 0, parts[3] ?? 0, parts[4] ?? 0] : [0, 0, 0];
+    const sub = isFullKey ? (parts[5] ?? 0) : (parts[1] ?? 0);
+    const subRunes = isFullKey ? [parts[6] ?? 0, parts[7] ?? 0] : [0, 0];
+    const statShards: [number, number, number] = isFullKey
+      ? [parts[8] ?? 0, parts[9] ?? 0, parts[10] ?? 0]
+      : [0, 0, 0];
     map.set(key, {
-      primaryStyle: primary ?? 0,
-      subStyle: sub ?? 0,
-      keystone: keystone ?? 0,
+      primaryStyle: primary,
+      keystone,
+      primaryMinors,
+      subStyle: sub,
+      subRunes,
+      statShards,
       count,
       wins
     });
   }
   return map;
+}
+
+function serializeSkillLevelMap(map: Map<number, number>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [slot, count] of map) out[String(slot)] = count;
+  return out;
+}
+
+function deserializeSkillLevelMap(obj: Record<string, number>): Map<number, number> {
+  const map = new Map<number, number>();
+  for (const [slot, count] of Object.entries(obj)) {
+    map.set(parseInt(slot, 10), count);
+  }
+  return map;
+}
+
+function padArray<T>(arr: T[], targetLength: number, fill: T): T[] {
+  if (arr.length >= targetLength) return arr.slice(0, targetLength);
+  return [...arr, ...Array.from({ length: targetLength - arr.length }, () => fill)];
 }
 
 function serializeSpellMap(map: Map<string, SpellBucketEntry>): Record<string, [number, number]> {
@@ -565,6 +648,8 @@ function getOrCreateBucket(
   return bucket;
 }
 
+const MAX_LEVEL = 18;
+
 function getOrCreateRoleBucket(
   bucket: ChampionBucket,
   role: string,
@@ -581,7 +666,9 @@ function getOrCreateRoleBucket(
       boots: new Map(),
       bootsPicked: 0,
       runes: new Map(),
-      spells: new Map()
+      spells: new Map(),
+      skillSlotsByLevel: Array.from({ length: MAX_LEVEL }, () => new Map()),
+      skillLevelReached: Array.from({ length: MAX_LEVEL }, () => 0)
     };
     bucket.byRole.set(role, rb);
   }
@@ -592,18 +679,67 @@ function addRune(rb: RoleBucket, p: MatchParticipant): void {
   const primary = p.perks.styles[0];
   const sub = p.perks.styles[1];
   if (!primary || !sub) return;
-  const keystone = primary.selections[0]?.perk ?? 0;
-  const key = `${primary.style}-${sub.style}-${keystone}`;
+  const primaryPerks = primary.selections.map((s) => s.perk);
+  const subPerks = sub.selections.map((s) => s.perk);
+  const keystone = primaryPerks[0] ?? 0;
+  const primaryMinors = [
+    primaryPerks[1] ?? 0,
+    primaryPerks[2] ?? 0,
+    primaryPerks[3] ?? 0
+  ];
+  const subRunes = [subPerks[0] ?? 0, subPerks[1] ?? 0];
+  const stats = p.perks.statPerks;
+  const statShards: [number, number, number] = [
+    stats?.offense ?? 0,
+    stats?.flex ?? 0,
+    stats?.defense ?? 0
+  ];
+  const key = [
+    primary.style,
+    keystone,
+    ...primaryMinors,
+    sub.style,
+    ...subRunes,
+    ...statShards
+  ].join('-');
   const entry = rb.runes.get(key) ?? {
     primaryStyle: primary.style,
-    subStyle: sub.style,
     keystone,
+    primaryMinors,
+    subStyle: sub.style,
+    subRunes,
+    statShards,
     count: 0,
     wins: 0
   };
   entry.count += 1;
   if (p.win) entry.wins += 1;
   rb.runes.set(key, entry);
+}
+
+function addSkillOrder(
+  rb: RoleBucket,
+  participantId: number,
+  timeline: MatchTimelineDto,
+  win: boolean
+): void {
+  let level = 0;
+  for (const frame of timeline.info.frames) {
+    for (const event of frame.events) {
+      if (event.type !== 'SKILL_LEVEL_UP') continue;
+      if ((event as { participantId?: number }).participantId !== participantId) continue;
+      const slot = (event as { skillSlot?: number }).skillSlot;
+      if (typeof slot !== 'number' || slot < 1 || slot > 4) continue;
+      level += 1;
+      if (level > MAX_LEVEL) break;
+      const idx = level - 1;
+      rb.skillLevelReached[idx] = (rb.skillLevelReached[idx] ?? 0) + 1;
+      const slotMap = rb.skillSlotsByLevel[idx]!;
+      slotMap.set(slot, (slotMap.get(slot) ?? 0) + 1);
+    }
+    if (level >= MAX_LEVEL) break;
+  }
+  void win;
 }
 
 function addSpells(rb: RoleBucket, p: MatchParticipant): void {
@@ -660,8 +796,11 @@ function rankRunes(rb: RoleBucket, n: number): RuneSetup[] {
   return [...rb.runes.values()]
     .map((r) => ({
       primaryStyle: r.primaryStyle,
-      subStyle: r.subStyle,
       keystone: r.keystone,
+      primaryMinors: [...r.primaryMinors],
+      subStyle: r.subStyle,
+      subRunes: [...r.subRunes],
+      statShards: [...r.statShards] as [number, number, number],
       count: r.count,
       winrate: ratio(r.wins, r.count)
     }))
@@ -679,6 +818,28 @@ function rankSpells(rb: RoleBucket, n: number): SpellPair[] {
     }))
     .sort(byCountDesc)
     .slice(0, n);
+}
+
+function rankSkillOrder(rb: RoleBucket): SkillSlotPick[] {
+  const out: SkillSlotPick[] = [];
+  for (let level = 0; level < MAX_LEVEL; level++) {
+    const reached = rb.skillLevelReached[level] ?? 0;
+    if (reached === 0) {
+      out.push({ slot: 0, pickRate: 0 });
+      continue;
+    }
+    const slotMap = rb.skillSlotsByLevel[level]!;
+    let bestSlot = 0;
+    let bestCount = 0;
+    for (const [slot, count] of slotMap) {
+      if (count > bestCount) {
+        bestCount = count;
+        bestSlot = slot;
+      }
+    }
+    out.push({ slot: bestSlot, pickRate: ratio(bestCount, reached) });
+  }
+  return out;
 }
 
 function byCountDesc<T extends { count: number }>(a: T, b: T): number {

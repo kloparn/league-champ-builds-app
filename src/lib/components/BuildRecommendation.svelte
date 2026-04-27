@@ -5,9 +5,9 @@
     type ChampionBuildStats,
     type ItemEntry
   } from '$lib/build-aggregator';
-  import type { Item, Rune, RuneStyle, SummonerSpell } from '$lib/types';
+  import type { ChampionSpell, Item, Rune, RuneStyle, SummonerSpell } from '$lib/types';
   import { itemIcon, runeIcon, spellIcon } from '$lib/ddragon';
-  import { tierSourceLabel } from '$lib/utils';
+  import { skillSlotLabel, statShardLabel, tierSourceLabel } from '$lib/utils';
 
   interface Props {
     version: string;
@@ -15,6 +15,8 @@
     patch: string;
     generatedAt: string;
     tiers?: string[];
+    /** Champion's Q/W/E/R spells, in slot order. */
+    championSpells: ChampionSpell[];
     summonerSpells: Record<number, SummonerSpell>;
     runeStyles: RuneStyle[];
     items: Record<string, Item>;
@@ -26,6 +28,7 @@
     patch,
     generatedAt,
     tiers = [],
+    championSpells,
     summonerSpells,
     runeStyles,
     items
@@ -59,9 +62,10 @@
   const stylesById = $derived(
     Object.fromEntries(runeStyles.map((s) => [s.id, s])) as Record<number, RuneStyle>
   );
-  const keystonesById = $derived(
+  /** Every rune across every tree+slot, indexed by id. */
+  const runesById = $derived(
     Object.fromEntries(
-      runeStyles.flatMap((s) => s.slots[0]?.runes ?? []).map((r) => [r.id, r])
+      runeStyles.flatMap((s) => s.slots.flatMap((slot) => slot.runes)).map((r) => [r.id, r])
     ) as Record<number, Rune>
   );
 
@@ -246,49 +250,178 @@
       </div>
     {/if}
 
+    {@const skillOrder = roleData.skillOrder ?? []}
+    {#if skillOrder.some((s) => s.slot > 0)}
+      <h3 class="mb-2 font-display text-sm uppercase tracking-widest text-hex-cyan">
+        Skill order
+      </h3>
+      <div class="mb-5 overflow-x-auto">
+        <div
+          class="grid items-center gap-0.5 text-center"
+          style="grid-template-columns: auto repeat(18, minmax(1.4rem, 1fr));"
+        >
+          <div></div>
+          {#each Array(18) as _, idx (idx)}
+            <div class="font-mono text-[9px] text-hex-mist/60">{idx + 1}</div>
+          {/each}
+
+          {#each [1, 2, 3, 4] as slot (slot)}
+            {@const spell = championSpells[slot - 1]}
+            <div class="flex items-center gap-1.5 pr-2">
+              {#if spell}
+                <img
+                  src={spellIcon(version, spell.image.full)}
+                  alt={spell.name}
+                  width="22"
+                  height="22"
+                  class="rounded-sm border border-hex-gold/30"
+                  loading="lazy"
+                />
+              {/if}
+              <span class="font-display text-[11px] font-bold text-hex-gold">
+                {skillSlotLabel(slot)}
+              </span>
+            </div>
+            {#each skillOrder as pick, level (level)}
+              {@const active = pick.slot === slot}
+              <div
+                class={active
+                  ? 'flex h-6 items-center justify-center rounded-sm border border-hex-gold bg-hex-gold/10 font-display text-[10px] font-bold text-hex-goldHi'
+                  : 'flex h-6 items-center justify-center rounded-sm border border-hex-border/40 text-transparent'}
+                title={active ? `${spell?.name ?? skillSlotLabel(slot)} — Lv ${level + 1}` : ''}
+              >
+                {active ? level + 1 : ''}
+              </div>
+            {/each}
+          {/each}
+        </div>
+      </div>
+    {/if}
+
     {#if topRune}
       {@const primary = stylesById[topRune.primaryStyle]}
       {@const sub = stylesById[topRune.subStyle]}
-      {@const keystone = keystonesById[topRune.keystone]}
-      <h3 class="mb-2 font-display text-sm uppercase tracking-widest text-hex-cyan">Runes</h3>
-      <div class="flex items-center gap-3">
-        {#if keystone}
-          <img
-            src={runeIcon(keystone.icon)}
-            alt={keystone.name}
-            width="48"
-            height="48"
-            class="rounded-full border border-hex-gold/30 bg-hex-void/40"
-            loading="lazy"
-          />
+      {@const primaryPicks = new Set([topRune.keystone, ...(topRune.primaryMinors ?? [])])}
+      {@const subPicks = new Set(topRune.subRunes ?? [])}
+      <div class="mb-2 flex items-baseline justify-between">
+        <h3 class="font-display text-sm uppercase tracking-widest text-hex-cyan">Runes</h3>
+        <div class="font-mono text-[11px] text-hex-mist">
+          {runePickRate.toFixed(0)}% · {(topRune.winrate * 100).toFixed(1)}% wr
+        </div>
+      </div>
+
+      <div class="grid gap-3 md:grid-cols-2">
+        {#if primary}
+          <div class="hex-frame rounded-md p-3">
+            <header class="mb-2 flex items-center gap-2">
+              <img src={runeIcon(primary.icon)} alt={primary.name} width="22" height="22" loading="lazy" />
+              <span class="font-display text-xs uppercase tracking-widest text-hex-goldHi">
+                {primary.name}
+              </span>
+            </header>
+            {#each primary.slots as slot, slotIdx (slotIdx)}
+              <div class="mb-1.5 flex items-center justify-around gap-1">
+                {#each slot.runes as r (r.id)}
+                  {@const picked = primaryPicks.has(r.id)}
+                  {@const big = slotIdx === 0}
+                  <div
+                    class={picked
+                      ? 'rune-cell rune-on'
+                      : 'rune-cell rune-off'}
+                    title={r.name + (picked ? ' — selected' : '')}
+                  >
+                    <img
+                      src={runeIcon(r.icon)}
+                      alt={r.name}
+                      width={big ? 36 : 26}
+                      height={big ? 36 : 26}
+                      class="rounded-full"
+                      loading="lazy"
+                    />
+                  </div>
+                {/each}
+              </div>
+            {/each}
+          </div>
         {/if}
-        <div class="flex-1 text-sm">
-          <div class="text-hex-parchment/90">
-            {keystone?.name ?? `Keystone #${topRune.keystone}`}
-          </div>
-          <div class="flex items-center gap-1.5 text-xs text-hex-mist">
-            {#if primary}
-              <img
-                src={runeIcon(primary.icon)}
-                alt={primary.name}
-                width="14"
-                height="14"
-                loading="lazy"
-              />
+
+        {#if sub}
+          <div class="hex-frame rounded-md p-3">
+            <header class="mb-2 flex items-center gap-2">
+              <img src={runeIcon(sub.icon)} alt={sub.name} width="22" height="22" loading="lazy" />
+              <span class="font-display text-xs uppercase tracking-widest text-hex-cyan">
+                {sub.name}
+              </span>
+            </header>
+            <!-- secondary tree shows slots 1-3 (no keystone row) -->
+            {#each sub.slots.slice(1) as slot, slotIdx (slotIdx)}
+              <div class="mb-1.5 flex items-center justify-around gap-1">
+                {#each slot.runes as r (r.id)}
+                  {@const picked = subPicks.has(r.id)}
+                  <div
+                    class={picked
+                      ? 'rune-cell rune-on'
+                      : 'rune-cell rune-off'}
+                    title={r.name + (picked ? ' — selected' : '')}
+                  >
+                    <img
+                      src={runeIcon(r.icon)}
+                      alt={r.name}
+                      width="26"
+                      height="26"
+                      class="rounded-full"
+                      loading="lazy"
+                    />
+                  </div>
+                {/each}
+              </div>
+            {/each}
+
+            {#if (topRune.statShards ?? []).some((id) => id > 0)}
+              <div class="mt-3 border-t border-hex-border/60 pt-2">
+                <p class="mb-1 font-display text-[10px] uppercase tracking-widest text-hex-mist">
+                  Stat shards
+                </p>
+                <ul class="space-y-0.5 font-mono text-[11px] text-hex-parchment/90">
+                  {#each topRune.statShards as shardId, idx (idx)}
+                    {@const labels = ['Offense', 'Flex', 'Defense']}
+                    <li>
+                      <span class="text-hex-mist">{labels[idx]}:</span>
+                      {statShardLabel(shardId)}
+                    </li>
+                  {/each}
+                </ul>
+              </div>
             {/if}
-            <span>{primary?.name ?? `#${topRune.primaryStyle}`}</span>
-            <span class="text-hex-mist/60">+</span>
-            {#if sub}
-              <img src={runeIcon(sub.icon)} alt={sub.name} width="14" height="14" loading="lazy" />
-            {/if}
-            <span>{sub?.name ?? `#${topRune.subStyle}`}</span>
           </div>
-        </div>
-        <div class="text-right font-mono text-[11px] text-hex-mist">
-          <div>{runePickRate.toFixed(0)}%</div>
-          <div>{(topRune.winrate * 100).toFixed(1)}% wr</div>
-        </div>
+        {/if}
       </div>
     {/if}
   {/if}
 </section>
+
+<style>
+  .rune-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 2px;
+    transition: opacity 150ms, box-shadow 150ms;
+  }
+
+  .rune-on {
+    box-shadow: 0 0 0 2px theme('colors.hex.gold'), 0 0 12px theme('colors.hex.gold' / 50%);
+    background-color: rgba(200, 170, 110, 0.12);
+  }
+
+  .rune-off {
+    opacity: 0.32;
+    filter: grayscale(0.55);
+  }
+
+  .rune-off:hover {
+    opacity: 0.55;
+    filter: grayscale(0.2);
+  }
+</style>

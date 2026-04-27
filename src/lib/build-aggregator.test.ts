@@ -95,6 +95,15 @@ function undo(
   return { type: 'ITEM_UNDO', participantId, beforeId, afterId, timestamp: ts };
 }
 
+function skillUp(participantId: number, slot: number, ts: number): TimelineEvent {
+  return {
+    type: 'SKILL_LEVEL_UP',
+    participantId,
+    skillSlot: slot,
+    timestamp: ts
+  };
+}
+
 // Marksman legendaries for these tests: Statikk Shiv (6677), Phantom Dancer (3046),
 // Infinity Edge (3031). Tier-2 boots: Berserker's Greaves (3006). Components like
 // Long Sword (1036) are excluded by the predicate.
@@ -281,7 +290,8 @@ describe('rolesByPopularity', () => {
       itemPath: [],
       topBoots: [],
       topRunes: [],
-      topSummonerSpells: []
+      topSummonerSpells: [],
+      skillOrder: []
     };
     const order = rolesByPopularity({
       TOP: { games: 5, ...empty },
@@ -523,5 +533,78 @@ describe('incremental state aggregation', () => {
     expect(path?.[0]?.[0]?.itemId).toBe(6677);
     expect(path?.[1]?.[0]?.itemId).toBe(3046);
     expect(path?.[2]?.[0]?.itemId).toBe(3031);
+  });
+
+  it('records modal skill pick per level from SKILL_LEVEL_UP events', () => {
+    const m = match([p({ teamPosition: 'JUNGLE', win: true })]);
+    // Q-W-E-Q-Q-R-Q-... (Amumu-style "max Q first")
+    const t = timeline({
+      1: [
+        skillUp(1, 1, 60_000),
+        skillUp(1, 2, 120_000),
+        skillUp(1, 3, 180_000),
+        skillUp(1, 1, 240_000),
+        skillUp(1, 1, 300_000),
+        skillUp(1, 4, 360_000)
+      ]
+    });
+
+    const result = aggregateBuilds([{ match: m, timeline: t }], {
+      ...BASE_OPTIONS,
+      isLegendary,
+      isBoots
+    });
+    const order = result.champions.Amumu.byRole.JUNGLE?.skillOrder ?? [];
+    expect(order[0]?.slot).toBe(1); // Q at level 1
+    expect(order[1]?.slot).toBe(2); // W at level 2
+    expect(order[2]?.slot).toBe(3); // E at level 3
+    expect(order[3]?.slot).toBe(1); // Q at level 4
+    expect(order[5]?.slot).toBe(4); // R at level 6
+    expect(order).toHaveLength(18);
+  });
+
+  it('captures the full rune page (keystone, minors, sub, stat shards)', () => {
+    const detailed = (over: Partial<MatchParticipant> = {}) =>
+      p({
+        teamPosition: 'MIDDLE',
+        win: true,
+        perks: {
+          styles: [
+            {
+              style: 8000,
+              description: 'primaryStyle',
+              selections: [
+                { perk: 8005, var1: 0, var2: 0, var3: 0 }, // keystone: Press the Attack
+                { perk: 9101, var1: 0, var2: 0, var3: 0 }, // Triumph
+                { perk: 9104, var1: 0, var2: 0, var3: 0 }, // Legend: Alacrity
+                { perk: 8014, var1: 0, var2: 0, var3: 0 } // Coup de Grace
+              ]
+            },
+            {
+              style: 8400,
+              description: 'subStyle',
+              selections: [
+                { perk: 8473, var1: 0, var2: 0, var3: 0 }, // Bone Plating
+                { perk: 8453, var1: 0, var2: 0, var3: 0 } // Revitalize
+              ]
+            }
+          ],
+          statPerks: { offense: 5008, flex: 5008, defense: 5002 }
+        },
+        ...over
+      });
+
+    const result = aggregateBuilds(
+      [match([detailed()]), match([detailed()])],
+      { ...BASE_OPTIONS, isLegendary, isBoots }
+    );
+
+    const top = result.champions.Amumu.byRole.MIDDLE?.topRunes[0];
+    expect(top?.keystone).toBe(8005);
+    expect(top?.primaryMinors).toEqual([9101, 9104, 8014]);
+    expect(top?.subStyle).toBe(8400);
+    expect(top?.subRunes).toEqual([8473, 8453]);
+    expect(top?.statShards).toEqual([5008, 5008, 5002]);
+    expect(top?.count).toBe(2);
   });
 });

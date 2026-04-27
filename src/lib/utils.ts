@@ -64,6 +64,29 @@ const TIER_LABEL: Record<string, string> = {
   IRON: 'Iron'
 };
 
+const STAT_SHARDS: Record<number, string> = {
+  5001: 'Health Scaling',
+  5002: 'Armor',
+  5003: 'Magic Resist',
+  5005: 'Attack Speed',
+  5007: 'Ability Haste',
+  5008: 'Adaptive Force',
+  5010: 'Move Speed',
+  5011: 'Health Scaling',
+  5013: 'Tenacity & Slow'
+};
+
+export function statShardLabel(id: number | undefined): string {
+  if (!id) return '—';
+  return STAT_SHARDS[id] ?? `#${id}`;
+}
+
+const SKILL_LABELS = ['Q', 'W', 'E', 'R'] as const;
+
+export function skillSlotLabel(slot: number): string {
+  return SKILL_LABELS[slot - 1] ?? '·';
+}
+
 /** Render a tier list as a "lowest+" label (e.g. ["CHALLENGER","DIAMOND"] → "Diamond+"). */
 export function tierSourceLabel(tiers: string[] | undefined): string | null {
   if (!tiers || tiers.length === 0) return null;
