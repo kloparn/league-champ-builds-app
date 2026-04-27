@@ -37,3 +37,42 @@ export function difficultyFill(value: number, max = 10): DifficultyFill {
   const tone: DifficultyTone = value >= 8 ? 'high' : value >= 5 ? 'mid' : 'low';
   return { pct, tone };
 }
+
+const TIER_RANK: Record<string, number> = {
+  CHALLENGER: 0,
+  GRANDMASTER: 1,
+  MASTER: 2,
+  DIAMOND: 3,
+  EMERALD: 4,
+  PLATINUM: 5,
+  GOLD: 6,
+  SILVER: 7,
+  BRONZE: 8,
+  IRON: 9
+};
+
+const TIER_LABEL: Record<string, string> = {
+  CHALLENGER: 'Challenger',
+  GRANDMASTER: 'Grandmaster',
+  MASTER: 'Master',
+  DIAMOND: 'Diamond',
+  EMERALD: 'Emerald',
+  PLATINUM: 'Platinum',
+  GOLD: 'Gold',
+  SILVER: 'Silver',
+  BRONZE: 'Bronze',
+  IRON: 'Iron'
+};
+
+/** Render a tier list as a "lowest+" label (e.g. ["CHALLENGER","DIAMOND"] → "Diamond+"). */
+export function tierSourceLabel(tiers: string[] | undefined): string | null {
+  if (!tiers || tiers.length === 0) return null;
+  const ranked = tiers
+    .map((t) => t.toUpperCase())
+    .filter((t) => t in TIER_RANK)
+    .sort((a, b) => TIER_RANK[a]! - TIER_RANK[b]!);
+  if (ranked.length === 0) return null;
+  if (ranked.length === 1) return TIER_LABEL[ranked[0]!]!;
+  const lowest = ranked[ranked.length - 1]!;
+  return `${TIER_LABEL[lowest]}+`;
+}

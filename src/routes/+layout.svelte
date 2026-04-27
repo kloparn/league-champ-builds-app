@@ -35,7 +35,23 @@
           Champ Builds
         </span>
       </a>
-      <nav class="text-sm">
+      <nav class="flex items-center gap-5 text-sm">
+        <a
+          href="/"
+          class="font-display text-xs uppercase tracking-widest hover:text-hex-gold"
+          class:text-hex-gold={page.url.pathname === '/'}
+          class:text-hex-mist={page.url.pathname !== '/'}
+        >
+          Champions
+        </a>
+        <a
+          href="/winrates"
+          class="font-display text-xs uppercase tracking-widest hover:text-hex-gold"
+          class:text-hex-gold={page.url.pathname.startsWith('/winrates')}
+          class:text-hex-mist={!page.url.pathname.startsWith('/winrates')}
+        >
+          Win rates
+        </a>
         <a
           href="https://developer.riotgames.com/docs/lol#data-dragon"
           target="_blank"

@@ -1,9 +1,18 @@
-import type { ChampionDetail, ChampionSummary } from './types';
+import type {
+  ChampionDetail,
+  ChampionSummary,
+  Item,
+  RuneStyle,
+  SummonerSpell
+} from './types';
 
 const DDRAGON = 'https://ddragon.leagueoflegends.com';
 const VERSION_TTL_MS = 60 * 60 * 1000;
 const CHAMPIONS_TTL_MS = 60 * 60 * 1000;
 const CHAMPION_TTL_MS = 24 * 60 * 60 * 1000;
+const SUMMONER_SPELLS_TTL_MS = 24 * 60 * 60 * 1000;
+const RUNES_TTL_MS = 24 * 60 * 60 * 1000;
+const ITEMS_TTL_MS = 24 * 60 * 60 * 1000;
 
 interface CacheEntry<T> {
   value: T;
@@ -45,7 +54,7 @@ export async function getLatestVersion(fetchFn: typeof fetch = fetch): Promise<s
 }
 
 export async function getChampions(
-  fetchFn: typeof fetch = fetch
+  fetchFn: typeof fetch
 ): Promise<{ version: string; champions: ChampionSummary[] }> {
   const version = await getLatestVersion(fetchFn);
   const cacheKey = `champions:${version}`;
@@ -63,7 +72,7 @@ export async function getChampions(
 
 export async function getChampion(
   id: string,
-  fetchFn: typeof fetch = fetch
+  fetchFn: typeof fetch
 ): Promise<{ version: string; champion: ChampionDetail } | null> {
   const version = await getLatestVersion(fetchFn);
   const cacheKey = `champion:${version}:${id}`;
@@ -81,8 +90,73 @@ export async function getChampion(
   return { version, champion };
 }
 
+export async function getSummonerSpells(
+  fetchFn: typeof fetch
+): Promise<{ version: string; spells: Record<number, SummonerSpell> }> {
+  const version = await getLatestVersion(fetchFn);
+  const cacheKey = `summoner:${version}`;
+  const cached = getCached<Record<number, SummonerSpell>>(cacheKey);
+  if (cached) return { version, spells: cached };
+
+  const data = await fetchJson<{ data: Record<string, SummonerSpell> }>(
+    fetchFn,
+    `${DDRAGON}/cdn/${version}/data/en_US/summoner.json`
+  );
+  const spells: Record<number, SummonerSpell> = {};
+  for (const spell of Object.values(data.data)) {
+    const k = parseInt(spell.key, 10);
+    if (!Number.isNaN(k)) spells[k] = spell;
+  }
+  setCached(cacheKey, spells, SUMMONER_SPELLS_TTL_MS);
+  return { version, spells };
+}
+
+export async function getRunes(
+  fetchFn: typeof fetch
+): Promise<{ version: string; styles: RuneStyle[] }> {
+  const version = await getLatestVersion(fetchFn);
+  const cacheKey = `runes:${version}`;
+  const cached = getCached<RuneStyle[]>(cacheKey);
+  if (cached) return { version, styles: cached };
+
+  const styles = await fetchJson<RuneStyle[]>(
+    fetchFn,
+    `${DDRAGON}/cdn/${version}/data/en_US/runesReforged.json`
+  );
+  setCached(cacheKey, styles, RUNES_TTL_MS);
+  return { version, styles };
+}
+
+export async function getItems(
+  fetchFn: typeof fetch
+): Promise<{ version: string; items: Record<string, Item> }> {
+  const version = await getLatestVersion(fetchFn);
+  const cacheKey = `items:${version}`;
+  const cached = getCached<Record<string, Item>>(cacheKey);
+  if (cached) return { version, items: cached };
+
+  const data = await fetchJson<{ data: Record<string, Omit<Item, 'id'>> }>(
+    fetchFn,
+    `${DDRAGON}/cdn/${version}/data/en_US/item.json`
+  );
+  const items: Record<string, Item> = {};
+  for (const [id, info] of Object.entries(data.data)) {
+    items[id] = { id, ...info };
+  }
+  setCached(cacheKey, items, ITEMS_TTL_MS);
+  return { version, items };
+}
+
 export function squareIcon(version: string, image: string): string {
   return `${DDRAGON}/cdn/${version}/img/champion/${image}`;
+}
+
+export function itemIcon(version: string, itemId: number): string {
+  return `${DDRAGON}/cdn/${version}/img/item/${itemId}.png`;
+}
+
+export function runeIcon(iconPath: string): string {
+  return `${DDRAGON}/cdn/img/${iconPath}`;
 }
 
 export function loadingArt(championId: string, skinNum = 0): string {
