@@ -3,6 +3,7 @@ name: Refresh build recommendations
 on:
   schedule:
     - cron: '0 6 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
