@@ -77,7 +77,7 @@ const MODES: Record<'fast' | 'default' | 'github', ModeConfig> = {
       { tier: 'DIAMOND', division: 'I', limit: 1000 }
     ],
     matchesPerSummoner: 50,
-    maxMatchesPerRun: 20_000
+    maxMatchesPerRun: 8000
   }
 };
 
