@@ -31,8 +31,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [[ -n "$(git status --porcelain static/builds.json data/builds-state.json data/seen-matches.txt)" ]]; then
-            git add static/builds.json data/builds-state.json data/seen-matches.txt
+          if [[ -n "$(git status --porcelain static/builds.json data/builds-state.json.gz data/seen-matches.bin)" ]]; then
+            git add static/builds.json data/builds-state.json.gz data/seen-matches.bin
             git commit -m "chore: refresh builds.json"
             git push
           else
