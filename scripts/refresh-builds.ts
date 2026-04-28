@@ -4,9 +4,10 @@
  * static/builds.json so SvelteKit can serve it.
  *
  * Incremental per patch: state is persisted between runs in
- *   data/builds-state.json    — accumulated bucket counts (full granularity)
- *   data/seen-matches.txt     — match IDs already aggregated (newline-delimited)
- * Both reset automatically when a new patch is detected.
+ *   data/builds-state.json.gz — accumulated bucket counts (full granularity, gzipped)
+ *   data/seen-matches.bin     — match IDs already aggregated (8-byte uint64 BE each)
+ * Both reset automatically when a new patch is detected. Legacy
+ * builds-state.json / seen-matches.txt files are migrated on first load.
  *
  * Run locally:
  *   npm run refresh:builds        # reads .env via Node's --env-file-if-exists
@@ -380,15 +381,17 @@ const PATH_SLOTS = 4;
 const CHECKPOINT_EVERY = 100;
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const STATE_PATH = join(REPO_ROOT, 'data', 'builds-state.json');
-const SEEN_PATH = join(REPO_ROOT, 'data', 'seen-matches.txt');
+const STATE_PATH = join(REPO_ROOT, 'data', 'builds-state.json.gz');
+const LEGACY_STATE_PATH = join(REPO_ROOT, 'data', 'builds-state.json');
+const SEEN_PATH = join(REPO_ROOT, 'data', 'seen-matches.bin');
+const LEGACY_SEEN_PATH = join(REPO_ROOT, 'data', 'seen-matches.txt');
 const BUILDS_PATH = join(REPO_ROOT, 'static', 'builds.json');
 
 async function main() {
   const startTs = Date.now();
 
-  const seen = loadSeenMatches(SEEN_PATH);
-  const persisted = loadBucketState(STATE_PATH);
+  const seen = loadSeenMatches(SEEN_PATH, LEGACY_SEEN_PATH);
+  const persisted = loadBucketState(STATE_PATH, LEGACY_STATE_PATH);
   if (persisted) {
     console.log(
       `→ resumed state: patch ${persisted.patch}, ${persisted.sampleSize} matches, ${seen.size} seen IDs`
