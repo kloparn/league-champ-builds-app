@@ -75,7 +75,8 @@ const MODES: Record<'fast' | 'default' | 'github', ModeConfig> = {
       { tier: 'MASTER', limit: 1000 },
       { tier: 'DIAMOND', division: 'I', limit: 1000 }
     ],
-    matchesPerSummoner: 50
+    matchesPerSummoner: 50,
+    maxMatchesPerRun: 20_000
   }
 };
 
@@ -136,6 +137,8 @@ interface TierTarget {
 interface ModeConfig {
   tiers: TierTarget[];
   matchesPerSummoner: number;
+  /** Hard cap on match-detail+timeline calls per run. Holds runtime stable across patch cycles. */
+  maxMatchesPerRun?: number;
 }
 
 class RateLimiter {
@@ -415,12 +418,19 @@ async function main() {
     `  ${matchIds.size} unique match IDs${matchIdFailures ? ` (${matchIdFailures} summoners skipped)` : ''}`
   );
 
-  const newIds = [...matchIds].filter((id) => !seen.has(id));
+  let newIds = [...matchIds].filter((id) => !seen.has(id));
   console.log(`  ${newIds.length} new (skipping ${matchIds.size - newIds.length} already seen)`);
 
   if (newIds.length === 0) {
     console.log('→ nothing new to fetch — exiting');
     return;
+  }
+
+  if (MODE.maxMatchesPerRun && newIds.length > MODE.maxMatchesPerRun) {
+    console.log(
+      `  capping at ${MODE.maxMatchesPerRun} this run (deferring ${newIds.length - MODE.maxMatchesPerRun} to next run)`
+    );
+    newIds = newIds.slice(0, MODE.maxMatchesPerRun);
   }
 
   console.log(`→ DDragon`);
