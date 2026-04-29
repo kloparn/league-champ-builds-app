@@ -2,6 +2,7 @@
   import HeroCard from '$lib/components/HeroCard.svelte';
   import SearchBar from '$lib/components/SearchBar.svelte';
   import { displayName } from '$lib/utils';
+  import { SITE_NAME, SITE_URL } from '$lib/site';
   import type { ChampionRole } from '$lib/types';
   import type { PageData } from './$types';
 
@@ -25,16 +26,28 @@
       );
     });
   });
+
+  const websiteJsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description:
+      'Up-to-date League of Legends champion stats, builds, runes, abilities and lore.'
+  });
 </script>
 
 <svelte:head>
-  <title>League Champ Builds — All Champions ({data.version})</title>
+  <title>{SITE_NAME} — All Champions (Patch {data.version})</title>
   <meta
     name="description"
     content="Browse every League of Legends champion. Up-to-date stats, abilities, and lore on patch {data.version}. Filter by role and search by name."
   />
-  <meta property="og:title" content="League Champ Builds — All Champions" />
+  <meta property="og:title" content="{SITE_NAME} — All Champions" />
   <meta property="og:description" content="Browse every League of Legends champion on patch {data.version}." />
+  <meta property="twitter:title" content="{SITE_NAME} — All Champions" />
+  <meta property="twitter:description" content="Browse every League of Legends champion on patch {data.version}." />
+  {@html `<script type="application/ld+json">${websiteJsonLd}</script>`}
 </svelte:head>
 
 <section class="px-4 py-6 md:px-8">

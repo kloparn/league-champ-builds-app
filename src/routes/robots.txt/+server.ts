@@ -1,12 +1,13 @@
+import { SITE_URL } from '$lib/site';
 import type { RequestHandler } from './$types';
-
-const SITE_URL = 'https://leaguechampbuilds.netlify.app';
 
 export const GET: RequestHandler = () => {
   const body = `User-agent: *
 Allow: /
+Disallow: /api/
 
 Sitemap: ${SITE_URL}/sitemap.xml
+Host: ${SITE_URL.replace(/^https?:\/\//, '')}
 `;
 
   return new Response(body, {

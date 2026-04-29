@@ -1,13 +1,18 @@
 /**
  * Fetches recent Challenger ranked-solo matches from Riot's MATCH-V5 API
- * (match + timeline), aggregates per-champion build stats, and writes
- * static/builds.json so SvelteKit can serve it.
+ * (match + timeline), aggregates per-champion build stats, and uploads
+ * the result to a private GCS bucket as one file per champion plus
+ * meta.json and winrates.json.
  *
  * Incremental per patch: state is persisted between runs in
  *   data/builds-state.json.gz — accumulated bucket counts (full granularity, gzipped)
  *   data/seen-matches.bin     — match IDs already aggregated (8-byte uint64 BE each)
  * Both reset automatically when a new patch is detected. Legacy
  * builds-state.json / seen-matches.txt files are migrated on first load.
+ *
+ * Required env for upload:
+ *   GCP_SA_KEY    base64-encoded service account JSON (with bucket write access)
+ *   GCS_BUCKET    target bucket name
  *
  * Run locally:
  *   npm run refresh:builds        # reads .env via Node's --env-file-if-exists
@@ -19,19 +24,21 @@
  * constraint, so the limiter ends up pacing at ~0.83 req/s sustained.
  */
 
-import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { Storage } from '@google-cloud/storage';
 import {
   addMatchToState,
   finalizeState,
   patchFromGameVersion
 } from '../src/lib/build-aggregator.ts';
 import type {
+  BuildsData,
   EnrichedMatch,
   MatchDto,
   MatchTimelineDto
 } from '../src/lib/build-aggregator.ts';
+import { splitBuilds } from '../src/lib/builds-split.ts';
 import { getItems, getLatestVersion } from '../src/lib/ddragon.ts';
 import type { Item } from '../src/lib/types.ts';
 import {
@@ -385,7 +392,6 @@ const STATE_PATH = join(REPO_ROOT, 'data', 'builds-state.json.gz');
 const LEGACY_STATE_PATH = join(REPO_ROOT, 'data', 'builds-state.json');
 const SEEN_PATH = join(REPO_ROOT, 'data', 'seen-matches.bin');
 const LEGACY_SEEN_PATH = join(REPO_ROOT, 'data', 'seen-matches.txt');
-const BUILDS_PATH = join(REPO_ROOT, 'static', 'builds.json');
 
 async function main() {
   const startTs = Date.now();
@@ -552,12 +558,42 @@ async function main() {
     tiers: tiersFound
   });
 
-  mkdirSync(dirname(BUILDS_PATH), { recursive: true });
-  writeFileSync(BUILDS_PATH, JSON.stringify(builds, null, 2) + '\n');
+  await uploadToBucket(builds);
 
   const seconds = ((Date.now() - startTs) / 1000).toFixed(1);
   console.log(
-    `\n✓ ${BUILDS_PATH}\n  ${Object.keys(builds.champions).length} champions, ${pState.sampleSize} cumulative matches, patch ${canonicalPatch} (${seconds}s)`
+    `\n✓ uploaded to gs://${process.env.GCS_BUCKET}/\n  ${Object.keys(builds.champions).length} champions, ${pState.sampleSize} cumulative matches, patch ${canonicalPatch} (${seconds}s)`
+  );
+}
+
+async function uploadToBucket(builds: BuildsData): Promise<void> {
+  const sa = process.env.GCP_SA_KEY;
+  const bucketName = process.env.GCS_BUCKET;
+  if (!sa) throw new Error('GCP_SA_KEY env var not set');
+  if (!bucketName) throw new Error('GCS_BUCKET env var not set');
+
+  const credentials = JSON.parse(Buffer.from(sa, 'base64').toString('utf8'));
+  const storage = new Storage({ credentials, projectId: credentials.project_id });
+  const bucket = storage.bucket(bucketName);
+
+  const files = splitBuilds(builds);
+  console.log(`→ uploading ${files.length} files to gs://${bucketName}/`);
+
+  // Modest concurrency — GCS handles this comfortably and 170+ sequential
+  // round-trips would add minutes to the run.
+  const CONCURRENCY = 16;
+  let uploaded = 0;
+  await Promise.all(
+    Array.from({ length: CONCURRENCY }, async () => {
+      while (true) {
+        const file = files[uploaded++];
+        if (!file) return;
+        await bucket.file(file.path).save(file.body, {
+          contentType: 'application/json',
+          metadata: { cacheControl: 'public, max-age=300' }
+        });
+      }
+    })
   );
 }
 

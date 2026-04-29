@@ -44,15 +44,21 @@
   });
 
   const meta = $derived(data.builds);
-  const lastUpdated = $derived(new Date(meta.generatedAt).toLocaleDateString());
+  const lastUpdated = $derived(
+    meta.generatedAt ? new Date(meta.generatedAt).toLocaleDateString() : ''
+  );
+  const description = $derived(
+    `Champion win rates by role from recent Challenger ranked-solo games on patch ${meta.patch || 'live'}.`
+  );
 </script>
 
 <svelte:head>
   <title>Win rates — League Champ Builds (Patch {meta.patch})</title>
-  <meta
-    name="description"
-    content="Champion win rates by role from recent Challenger ranked-solo games on patch {meta.patch}."
-  />
+  <meta name="description" content={description} />
+  <meta property="og:title" content="Win rates — League Champ Builds" />
+  <meta property="og:description" content={description} />
+  <meta property="twitter:title" content="Win rates — League Champ Builds" />
+  <meta property="twitter:description" content={description} />
 </svelte:head>
 
 <section class="px-4 py-6 md:px-8">

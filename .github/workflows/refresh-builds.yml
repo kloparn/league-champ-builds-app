@@ -22,19 +22,21 @@ jobs:
 
       - run: npm ci
 
-      - name: Refresh builds.json
+      - name: Refresh and upload to GCS
         env:
           RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
         run: npm run refresh:builds:github
 
-      - name: Commit if changed
+      - name: Commit incremental state if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [[ -n "$(git status --porcelain static/builds.json data/builds-state.json.gz data/seen-matches.bin)" ]]; then
-            git add static/builds.json data/builds-state.json.gz data/seen-matches.bin
-            git commit -m "chore: refresh builds.json"
+          if [[ -n "$(git status --porcelain data/builds-state.json.gz data/seen-matches.bin)" ]]; then
+            git add data/builds-state.json.gz data/seen-matches.bin
+            git commit -m "chore: refresh aggregation state"
             git push
           else
-            echo "No changes."
+            echo "No state changes."
           fi

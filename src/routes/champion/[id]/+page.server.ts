@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { getChampion, getItems, getRunes, getSummonerSpells } from '$lib/ddragon';
-import { getBuildForChampion, getBuilds } from '$lib/builds';
+import { fetchChampion, fetchMeta } from '$lib/builds';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch, setHeaders }) => {
@@ -9,8 +9,7 @@ export const load: PageServerLoad = async ({ params, fetch, setHeaders }) => {
     throw error(404, `Champion "${params.id}" not found`);
   }
 
-  const build = getBuildForChampion(params.id) ?? null;
-  const builds = getBuilds();
+  const [build, meta] = await Promise.all([fetchChampion(params.id), fetchMeta()]);
 
   const [
     { spells: summonerSpells },
@@ -28,12 +27,14 @@ export const load: PageServerLoad = async ({ params, fetch, setHeaders }) => {
     version: result.version,
     champion: result.champion,
     build,
-    buildsMeta: {
-      patch: builds.patch,
-      generatedAt: builds.generatedAt,
-      sampleSize: builds.sampleSize,
-      tiers: builds.tiers ?? []
-    },
+    buildsMeta: meta
+      ? {
+          patch: meta.patch,
+          generatedAt: meta.generatedAt,
+          sampleSize: meta.sampleSize,
+          tiers: meta.tiers ?? []
+        }
+      : { patch: '', generatedAt: '', sampleSize: 0, tiers: [] as string[] },
     summonerSpells,
     runeStyles,
     items

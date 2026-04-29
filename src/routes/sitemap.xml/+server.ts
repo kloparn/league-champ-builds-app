@@ -1,25 +1,41 @@
 import { getChampions } from '$lib/ddragon';
+import { fetchMeta } from '$lib/builds';
+import { SITE_URL } from '$lib/site';
 import type { RequestHandler } from './$types';
 
-const SITE_URL = 'https://leaguechampbuilds.netlify.app';
+interface UrlEntry {
+  loc: string;
+  lastmod?: string;
+  changefreq?: 'daily' | 'weekly' | 'monthly';
+  priority?: string;
+}
 
 export const GET: RequestHandler = async ({ fetch, setHeaders }) => {
-  const { champions } = await getChampions(fetch);
+  const [{ champions }, meta] = await Promise.all([getChampions(fetch), fetchMeta()]);
 
-  const urls = [
-    `${SITE_URL}/`,
-    ...champions.map((c) => `${SITE_URL}/champion/${c.id}`)
+  const lastmod = meta?.generatedAt ? new Date(meta.generatedAt).toISOString() : undefined;
+
+  const entries: UrlEntry[] = [
+    { loc: `${SITE_URL}/`, lastmod, changefreq: 'daily', priority: '1.0' },
+    { loc: `${SITE_URL}/winrates`, lastmod, changefreq: 'daily', priority: '0.9' },
+    ...champions.map((c) => ({
+      loc: `${SITE_URL}/champion/${encodeURIComponent(c.id)}`,
+      lastmod,
+      changefreq: 'daily' as const,
+      priority: '0.8'
+    }))
   ];
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (loc) => `  <url>
-    <loc>${loc}</loc>
-    <changefreq>weekly</changefreq>
-  </url>`
-  )
+${entries
+  .map((e) => {
+    const parts = [`    <loc>${e.loc}</loc>`];
+    if (e.lastmod) parts.push(`    <lastmod>${e.lastmod}</lastmod>`);
+    if (e.changefreq) parts.push(`    <changefreq>${e.changefreq}</changefreq>`);
+    if (e.priority) parts.push(`    <priority>${e.priority}</priority>`);
+    return `  <url>\n${parts.join('\n')}\n  </url>`;
+  })
   .join('\n')}
 </urlset>`;
 
