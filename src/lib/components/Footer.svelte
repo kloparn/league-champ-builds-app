@@ -11,8 +11,10 @@
       Created by Adam Håkansson. © {year}
     </p>
     <p class="max-w-2xl text-[11px] leading-relaxed text-hex-mist/70">
-      Not affiliated with Riot Games. League of Legends and all related properties are trademarks
-      of Riot Games, Inc. Champion data via
+      League Champ Builds isn't endorsed by Riot Games and doesn't reflect the views or opinions
+      of Riot Games or anyone officially involved in producing or managing Riot Games properties.
+      Riot Games, and all associated properties are trademarks or registered trademarks of Riot
+      Games, Inc. Champion data via
       <a
         href="https://developer.riotgames.com/docs/lol#data-dragon"
         rel="noreferrer noopener"
