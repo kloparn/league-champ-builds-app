@@ -857,6 +857,18 @@ export function patchFromGameVersion(gameVersion: string): string {
   return `${parts[0]}.${parts[1]}`;
 }
 
+/**
+ * Numeric compare of two patch strings (`"16.9"` vs `"16.10"` etc).
+ * Returns negative if a<b, positive if a>b, 0 if equal. Handles the
+ * `16.9 < 16.10` case that string compare would get wrong.
+ */
+export function comparePatch(a: string, b: string): number {
+  const [aMaj = 0, aMin = 0] = a.split('.').map(Number);
+  const [bMaj = 0, bMin = 0] = b.split('.').map(Number);
+  if (aMaj !== bMaj) return aMaj - bMaj;
+  return aMin - bMin;
+}
+
 /** Format Riot's teamPosition values for display. */
 export function displayRole(role: string): string {
   switch (role) {

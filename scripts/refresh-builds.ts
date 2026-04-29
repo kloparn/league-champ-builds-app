@@ -24,6 +24,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   addMatchToState,
+  comparePatch,
   finalizeState,
   patchFromGameVersion
 } from '../src/lib/build-aggregator.ts';
@@ -76,7 +77,7 @@ const MODES: Record<'fast' | 'default' | 'github', ModeConfig> = {
       { tier: 'MASTER', limit: 1000 },
       { tier: 'DIAMOND', division: 'I', limit: 1000 }
     ],
-    matchesPerSummoner: 50,
+    matchesPerSummoner: 100,
     maxMatchesPerRun: 8000
   }
 };
@@ -438,13 +439,86 @@ async function main() {
 
   console.log(`→ DDragon`);
   const ddragonVersion = await getLatestVersion(fetch);
-  const canonicalPatch = patchFromGameVersion(ddragonVersion);
+  const ddragonPatch = patchFromGameVersion(ddragonVersion);
   const { items } = await getItems(fetch);
   console.log(
-    `  version ${ddragonVersion} → patch ${canonicalPatch}, ${Object.keys(items).length} items`
+    `  version ${ddragonVersion} (DDragon → ${ddragonPatch}), ${Object.keys(items).length} items`
   );
 
-  // Reset state if the patch has rolled over.
+  // Probe phase — fetch a small sample of match details to determine what
+  // patch the regional servers are actually serving. DDragon flips ahead of
+  // game-server rollout during patch turnover, so trust match.gameVersion
+  // over ddragonPatch. Cached results are reused in the main loop below.
+  const PROBE_SIZE = Math.min(30, newIds.length);
+  const probedMatches = new Map<string, MatchDto>();
+  const probeHist = new Map<string, number>();
+  console.log(`→ probing ${PROBE_SIZE} matches to detect canonical patch`);
+  for (const id of newIds.slice(0, PROBE_SIZE)) {
+    let match: MatchDto | null = null;
+    try {
+      match = await fetchMatch(id);
+    } catch (err) {
+      console.warn(`  probe skip ${id}: ${errMsg(err)}`);
+      continue;
+    }
+    if (!match) continue;
+    probedMatches.set(id, match);
+    const p = patchFromGameVersion(match.info.gameVersion);
+    probeHist.set(p, (probeHist.get(p) ?? 0) + 1);
+  }
+  const probeTotal = [...probeHist.values()].reduce((a, b) => a + b, 0);
+  const probeReport =
+    [...probeHist.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([p, c]) => `${p}:${c}`)
+      .join(', ') || '(empty)';
+  console.log(`  probe histogram (${probeTotal}): ${probeReport}`);
+
+  // Pick canonical patch:
+  //   - if no prior state, use the probe mode (whatever's most common right now).
+  //   - if we have prior state, flip forward to a newer patch as soon as it
+  //     reaches MIN_PROBE_MATCHES_TO_FLIP samples in the probe. We don't wait
+  //     for the new patch to dominate — even a small but non-trivial sample is
+  //     enough to start aggregating, because the soft-skip write guard below
+  //     keeps the public builds.json on the old data until the new state
+  //     crosses MIN_NEW_MATCHES_TO_WRITE. So flipping early is safe.
+  //   - we never flip backward; lingering pre-deploy matches in the probe
+  //     don't drag canonical back to an older patch.
+  const MIN_PROBE_MATCHES_TO_FLIP = 5;
+  let canonicalPatch: string;
+  if (probeTotal === 0) {
+    canonicalPatch = persisted?.patch ?? ddragonPatch;
+    console.log(`  no probe data — falling back to ${canonicalPatch}`);
+  } else if (!persisted) {
+    canonicalPatch = [...probeHist.entries()].sort((a, b) => b[1] - a[1])[0]![0];
+  } else {
+    const newerWithEnough = [...probeHist.entries()]
+      .filter(
+        ([p, c]) => comparePatch(p, persisted.patch) > 0 && c >= MIN_PROBE_MATCHES_TO_FLIP
+      )
+      .sort((a, b) => comparePatch(b[0], a[0]))[0];
+    if (newerWithEnough) {
+      canonicalPatch = newerWithEnough[0];
+      console.log(
+        `  flipping ${persisted.patch} → ${canonicalPatch} (${newerWithEnough[1]} of ${probeTotal} probe matches on new patch)`
+      );
+    } else {
+      canonicalPatch = persisted.patch;
+      const newer = [...probeHist.entries()]
+        .filter(([p]) => comparePatch(p, persisted.patch) > 0)
+        .map(([p, c]) => `${p}:${c}`)
+        .join(', ');
+      if (newer) {
+        console.log(
+          `  staying on ${persisted.patch} — newer patches (${newer}) below floor of ${MIN_PROBE_MATCHES_TO_FLIP}`
+        );
+      } else {
+        console.log(`  staying on ${persisted.patch}`);
+      }
+    }
+  }
+
+  // Reset state only if the canonical patch has actually rolled over.
   let pState = persisted;
   if (pState && pState.patch !== canonicalPatch) {
     console.log(
@@ -463,6 +537,7 @@ async function main() {
   let droppedCount = 0;
   let usedCount = 0;
   let pendingIds: string[] = [];
+  const droppedHist = new Map<string, number>();
 
   const flush = (final: boolean) => {
     if (pendingIds.length === 0) return;
@@ -478,18 +553,22 @@ async function main() {
 
   for (let i = 0; i < newIds.length; i++) {
     const id = newIds[i]!;
-    let match: MatchDto | null = null;
-    try {
-      match = await fetchMatch(id);
-    } catch (err) {
-      matchFailures++;
-      console.warn(`  skipping match ${id}: ${errMsg(err)}`);
-      continue;
+    let match: MatchDto | null = probedMatches.get(id) ?? null;
+    if (!match) {
+      try {
+        match = await fetchMatch(id);
+      } catch (err) {
+        matchFailures++;
+        console.warn(`  skipping match ${id}: ${errMsg(err)}`);
+        continue;
+      }
     }
     if (!match) continue;
 
-    if (patchFromGameVersion(match.info.gameVersion) !== canonicalPatch) {
+    const matchPatch = patchFromGameVersion(match.info.gameVersion);
+    if (matchPatch !== canonicalPatch) {
       droppedCount++;
+      droppedHist.set(matchPatch, (droppedHist.get(matchPatch) ?? 0) + 1);
       pendingIds.push(id); // mark seen so we don't re-fetch
       if (pendingIds.length >= CHECKPOINT_EVERY) flush(false);
       continue;
@@ -531,17 +610,34 @@ async function main() {
 
   flush(true);
 
+  const droppedReport =
+    [...droppedHist.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([p, c]) => `${p}:${c}`)
+      .join(', ') || '';
   console.log(
-    `  total: ${usedCount} on-patch matches aggregated, ${droppedCount} off-patch dropped` +
+    `  total: ${usedCount} on-patch (${canonicalPatch}) aggregated, ${droppedCount} off-patch dropped` +
+      (droppedReport ? ` [${droppedReport}]` : '') +
       (matchFailures || timelineFailures
         ? ` — ${matchFailures} match / ${timelineFailures} timeline failed`
         : '')
   );
 
-  if (usedCount < MIN_NEW_MATCHES_TO_WRITE && persisted == null) {
+  // First-ever run must seed state with enough data; fail loudly otherwise.
+  if (persisted == null && pState.sampleSize < MIN_NEW_MATCHES_TO_WRITE) {
     throw new Error(
-      `Only ${usedCount} on-patch matches on first run (minimum ${MIN_NEW_MATCHES_TO_WRITE}) — refusing to seed state with too little data.`
+      `Only ${pState.sampleSize} on-patch matches on first run (minimum ${MIN_NEW_MATCHES_TO_WRITE}) — refusing to seed state with too little data.`
     );
+  }
+
+  // Soft-skip: state too small to publish (e.g. just after a patch flip).
+  // Keep accumulating in data/builds-state.json.gz; don't overwrite the
+  // existing builds.json with near-empty data.
+  if (pState.sampleSize < MIN_NEW_MATCHES_TO_WRITE) {
+    console.warn(
+      `\nState has only ${pState.sampleSize} samples on patch ${canonicalPatch} (minimum ${MIN_NEW_MATCHES_TO_WRITE} to publish) — preserving existing ${BUILDS_PATH}.`
+    );
+    return;
   }
 
   const builds = finalizeState(pState.state, {
