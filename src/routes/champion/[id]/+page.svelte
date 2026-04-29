@@ -6,6 +6,7 @@
   import StatRow from '$lib/components/StatRow.svelte';
   import { displayName } from '$lib/utils';
   import { splashArt } from '$lib/ddragon';
+  import { canonical, SITE_NAME, SITE_URL } from '$lib/site';
   import type { PageData } from './$types';
 
   interface Props {
@@ -17,7 +18,52 @@
   const name = $derived(displayName(c.id, c.name));
   const splash = $derived(splashArt(c.id, 0));
   const description = $derived(
-    `${c.lore.slice(0, 200)}${c.lore.length > 200 ? '…' : ''}`
+    `${name} — ${c.title}. Build recommendations, abilities, stats and lore on patch ${data.buildsMeta.patch || data.version}.`
+  );
+  const url = $derived(canonical(`/champion/${c.id}`));
+
+  const breadcrumbJsonLd = $derived(
+    JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Champions',
+          item: `${SITE_URL}/`
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name,
+          item: url
+        }
+      ]
+    })
+  );
+
+  const articleJsonLd = $derived(
+    JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: `${name} build, abilities and stats`,
+      description,
+      image: splash,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+      author: { '@type': 'Organization', name: SITE_NAME },
+      publisher: {
+        '@type': 'Organization',
+        name: SITE_NAME,
+        url: SITE_URL
+      },
+      ...(data.buildsMeta.generatedAt
+        ? {
+            datePublished: data.buildsMeta.generatedAt,
+            dateModified: data.buildsMeta.generatedAt
+          }
+        : {})
+    })
   );
 
   type Tab = 'build' | 'champion';
@@ -25,12 +71,17 @@
 </script>
 
 <svelte:head>
-  <title>{name}, {c.title} — League Champ Builds</title>
+  <title>{name}, {c.title} — {SITE_NAME}</title>
   <meta name="description" content={description} />
   <meta property="og:title" content="{name} — {c.title}" />
   <meta property="og:description" content={description} />
   <meta property="og:image" content={splash} />
+  <meta property="og:type" content="article" />
   <meta property="twitter:image" content={splash} />
+  <meta property="twitter:title" content="{name} — {c.title}" />
+  <meta property="twitter:description" content={description} />
+  {@html `<script type="application/ld+json">${breadcrumbJsonLd}</script>`}
+  {@html `<script type="application/ld+json">${articleJsonLd}</script>`}
 </svelte:head>
 
 <div

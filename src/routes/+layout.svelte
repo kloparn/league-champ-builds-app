@@ -2,16 +2,26 @@
   import '../app.css';
   import Footer from '$lib/components/Footer.svelte';
   import { page } from '$app/state';
+  import { canonical, SITE_NAME, SITE_URL } from '$lib/site';
+  import { env } from '$env/dynamic/public';
 
   let { children } = $props();
+
+  const canonicalUrl = $derived(canonical(page.url.pathname));
+  const verification = env.PUBLIC_GOOGLE_SITE_VERIFICATION ?? '';
 </script>
 
 <svelte:head>
+  <link rel="canonical" href={canonicalUrl} />
+  {#if verification}
+    <meta name="google-site-verification" content={verification} />
+  {/if}
   <meta name="description" content="Browse every League of Legends champion with up-to-date stats, abilities, lore, and skin splash art. Server-rendered and always on the latest patch." />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="League Champ Builds" />
-  <meta property="og:url" content={page.url.href} />
+  <meta property="og:site_name" content={SITE_NAME} />
+  <meta property="og:url" content={canonicalUrl} />
   <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:domain" content={SITE_URL.replace(/^https?:\/\//, '')} />
 </svelte:head>
 
 <a
