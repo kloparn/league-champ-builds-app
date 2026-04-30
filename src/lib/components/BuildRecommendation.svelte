@@ -80,14 +80,28 @@
     topSpells && roleData ? (topSpells.count / roleData.games) * 100 : 0
   );
 
-  /** First entry per slot, ignoring empty slots. Falls back to popularity ranking
-   * for old builds.json files that don't have itemPath yet. */
-  const pathTopPerSlot = $derived.by<ItemEntry[]>(() => {
+  /** Min pickrate for an alternative to show alongside the top pick at a slot.
+   * Top pick always shows; alternatives below this threshold are dropped as noise. */
+  const ALT_PICKRATE_THRESHOLD = 0.1;
+  const MAX_ALTS_PER_SLOT = 3;
+
+  /** Top-N entries per slot (with the alt threshold applied), ignoring empty slots.
+   * Falls back to popularity ranking for old builds.json files that don't have itemPath. */
+  const pathPerSlot = $derived.by<ItemEntry[][]>(() => {
     if (!roleData) return [];
     const path = roleData.itemPath ?? [];
-    const fromPath = path.map((slot) => slot[0]).filter((e): e is ItemEntry => e != null);
+    const fromPath = path
+      .map((slot) => {
+        if (slot.length === 0) return [];
+        const top = slot[0]!;
+        const alts = slot
+          .slice(1, MAX_ALTS_PER_SLOT)
+          .filter((e) => e.pickRate >= ALT_PICKRATE_THRESHOLD);
+        return [top, ...alts];
+      })
+      .filter((slot) => slot.length > 0);
     if (fromPath.length > 0) return fromPath;
-    return fallbackLegendaries(roleData.topItems ?? []);
+    return fallbackLegendaries(roleData.topItems ?? []).map((e) => [e]);
   });
 
   const topBoots = $derived(roleData?.topBoots?.[0]);
@@ -134,78 +148,109 @@
       )}
     </p>
 
-    {#if pathTopPerSlot.length > 0 || topBoots}
-      <h3 class="mb-2 font-display text-sm uppercase tracking-widest text-hex-cyan">
+    {#if pathPerSlot.length > 0 || topBoots}
+      <h3 class="mb-3 font-display text-sm uppercase tracking-widest text-hex-cyan">
         Build path
       </h3>
-      <div class="mb-2 flex flex-wrap items-start gap-x-1 gap-y-3">
+      <ol
+        class="mb-2 flex flex-col gap-2 md:flex-row md:flex-wrap md:items-stretch md:gap-2.5"
+      >
         {#if topBoots}
           {@const meta = items[String(topBoots.itemId)]}
-          <div
-            class="flex w-16 flex-col items-center"
-            title={meta?.name
-              ? `${meta.name} — ${(topBoots.winrate * 100).toFixed(1)}% wr`
-              : `${(topBoots.winrate * 100).toFixed(1)}% wr`}
+          <li
+            class="rounded border border-hex-border/60 bg-hex-void/30 p-2.5 md:min-w-[180px] md:flex-1 md:basis-[180px]"
           >
-            <span class="mb-1 font-display text-[10px] uppercase tracking-widest text-hex-mist">
-              Boots
-            </span>
-            <img
-              src={itemIcon(version, topBoots.itemId)}
-              alt={meta?.name ?? `Item ${topBoots.itemId}`}
-              width="48"
-              height="48"
-              class="rounded border border-hex-gold/40 bg-hex-void/40"
-              loading="lazy"
-            />
-            <span
-              class="mt-1 line-clamp-2 text-center font-display text-[11px] leading-tight text-hex-goldHi"
+            <div class="mb-2 flex items-center justify-between">
+              <span class="font-display text-[11px] uppercase tracking-widest text-hex-cyan">
+                Boots
+              </span>
+              <span class="font-mono text-[10px] text-hex-mist/70">any step</span>
+            </div>
+            <div
+              class="flex items-center gap-3"
+              title={meta?.name
+                ? `${meta.name} — ${(topBoots.winrate * 100).toFixed(1)}% wr`
+                : `${(topBoots.winrate * 100).toFixed(1)}% wr`}
             >
-              {meta?.name ?? `#${topBoots.itemId}`}
-            </span>
-            <span class="mt-0.5 font-mono text-[11px] text-hex-mist">
-              {(topBoots.pickRate * 100).toFixed(0)}%
-            </span>
-          </div>
-          {#if pathTopPerSlot.length > 0}
-            <span class="mt-7 px-1 text-hex-mist/60" aria-hidden="true">|</span>
-          {/if}
+              <img
+                src={itemIcon(version, topBoots.itemId)}
+                alt={meta?.name ?? `Item ${topBoots.itemId}`}
+                width="44"
+                height="44"
+                class="shrink-0 rounded border border-hex-gold/40 bg-hex-void/40"
+                loading="lazy"
+              />
+              <div class="min-w-0 flex-1">
+                <div class="font-display text-sm leading-tight text-hex-goldHi">
+                  {meta?.name ?? `#${topBoots.itemId}`}
+                </div>
+                <div class="mt-0.5 font-mono text-[11px] text-hex-mist">
+                  {(topBoots.pickRate * 100).toFixed(0)}% pick · {(
+                    topBoots.winrate * 100
+                  ).toFixed(1)}% wr
+                </div>
+              </div>
+            </div>
+          </li>
         {/if}
 
-        {#each pathTopPerSlot as entry, idx (idx)}
-          {@const meta = items[String(entry.itemId)]}
-          <div
-            class="flex w-16 flex-col items-center"
-            title={meta?.name
-              ? `${meta.name} — ${(entry.winrate * 100).toFixed(1)}% wr`
-              : `${(entry.winrate * 100).toFixed(1)}% wr`}
+        {#each pathPerSlot as slot, slotIdx (slotIdx)}
+          <li
+            class="rounded border border-hex-border/60 bg-hex-void/30 p-2.5 md:min-w-[180px] md:flex-1 md:basis-[180px]"
           >
-            <span class="mb-1 font-display text-[10px] uppercase tracking-widest text-hex-mist">
-              {idx + 1}
-              {#if idx === 0}st{:else if idx === 1}nd{:else if idx === 2}rd{:else}th{/if}
-            </span>
-            <img
-              src={itemIcon(version, entry.itemId)}
-              alt={meta?.name ?? `Item ${entry.itemId}`}
-              width="48"
-              height="48"
-              class="rounded border border-hex-gold/40 bg-hex-void/40"
-              loading="lazy"
-            />
-            <span
-              class="mt-1 line-clamp-2 text-center font-display text-[11px] leading-tight text-hex-goldHi"
-            >
-              {meta?.name ?? `#${entry.itemId}`}
-            </span>
-            <span class="mt-0.5 font-mono text-[11px] text-hex-mist">
-              {(entry.pickRate * 100).toFixed(0)}%
-            </span>
-          </div>
-          {#if idx < pathTopPerSlot.length - 1}
-            <span class="mt-7 text-hex-gold/70" aria-hidden="true">→</span>
-          {/if}
+            <div class="mb-2 flex items-center justify-between">
+              <span class="font-display text-[11px] uppercase tracking-widest text-hex-cyan">
+                Item {slotIdx + 1}
+              </span>
+              {#if slot.length > 1}
+                <span class="font-mono text-[10px] text-hex-mist/70">
+                  {slot.length} options
+                </span>
+              {/if}
+            </div>
+            <ul class="flex flex-col gap-1.5">
+              {#each slot as entry, altIdx (entry.itemId)}
+                {@const meta = items[String(entry.itemId)]}
+                {@const isPrimary = altIdx === 0}
+                <li
+                  class="flex items-center gap-3"
+                  title={meta?.name
+                    ? `${meta.name} — ${(entry.winrate * 100).toFixed(1)}% wr`
+                    : `${(entry.winrate * 100).toFixed(1)}% wr`}
+                >
+                  <img
+                    src={itemIcon(version, entry.itemId)}
+                    alt={meta?.name ?? `Item ${entry.itemId}`}
+                    width={isPrimary ? 44 : 32}
+                    height={isPrimary ? 44 : 32}
+                    class="shrink-0 rounded border bg-hex-void/40 {isPrimary
+                      ? 'border-hex-gold/40'
+                      : 'ml-3 border-hex-border/60 opacity-80'}"
+                    loading="lazy"
+                  />
+                  <div class="min-w-0 flex-1">
+                    <div
+                      class="font-display leading-tight {isPrimary
+                        ? 'text-sm text-hex-goldHi'
+                        : 'text-xs text-hex-parchment/80'}"
+                    >
+                      {#if !isPrimary}
+                        <span class="mr-1 text-hex-mist/60">or</span>
+                      {/if}
+                      {meta?.name ?? `#${entry.itemId}`}
+                    </div>
+                    <div class="mt-0.5 font-mono text-[11px] text-hex-mist">
+                      {(entry.pickRate * 100).toFixed(0)}% pick · {(entry.winrate * 100).toFixed(
+                        1
+                      )}% wr
+                    </div>
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          </li>
         {/each}
-      </div>
+      </ol>
       {#if !hasTimelinePath}
         <p class="mb-4 font-mono text-[10px] italic text-hex-mist/70">
           Order inferred from popularity — refresh build data for purchase-order timeline.

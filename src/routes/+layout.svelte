@@ -23,22 +23,26 @@
 
 <div class="flex min-h-screen flex-col">
   <header class="border-b border-hex-border bg-hex-deep/95 backdrop-blur-md">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-      <a href="/" class="group flex items-center gap-2">
+    <div
+      class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 md:gap-6 md:px-8"
+    >
+      <a href="/" class="group flex shrink-0 items-center gap-2">
         <span
           class="flex h-8 w-8 items-center justify-center rounded-sm border border-hex-gold/60 font-display text-sm text-hex-gold transition-colors group-hover:border-hex-goldHi group-hover:text-hex-goldHi"
           aria-hidden="true"
         >
           ◆
         </span>
-        <span class="font-display text-lg uppercase tracking-widest text-hex-goldHi">
+        <span
+          class="hidden font-display uppercase tracking-widest text-hex-goldHi sm:inline sm:text-lg"
+        >
           Champ Builds
         </span>
       </a>
-      <nav class="flex items-center gap-5 text-sm">
+      <nav class="flex items-center gap-3 text-sm sm:gap-5">
         <a
           href="/"
-          class="font-display text-xs uppercase tracking-widest hover:text-hex-gold"
+          class="whitespace-nowrap font-display text-xs uppercase tracking-widest hover:text-hex-gold"
           class:text-hex-gold={page.url.pathname === '/'}
           class:text-hex-mist={page.url.pathname !== '/'}
         >
@@ -46,7 +50,7 @@
         </a>
         <a
           href="/winrates"
-          class="font-display text-xs uppercase tracking-widest hover:text-hex-gold"
+          class="whitespace-nowrap font-display text-xs uppercase tracking-widest hover:text-hex-gold"
           class:text-hex-gold={page.url.pathname.startsWith('/winrates')}
           class:text-hex-mist={!page.url.pathname.startsWith('/winrates')}
         >
@@ -56,7 +60,7 @@
           href="https://developer.riotgames.com/docs/lol#data-dragon"
           target="_blank"
           rel="noreferrer noopener"
-          class="font-display text-xs uppercase tracking-widest text-hex-mist hover:text-hex-gold"
+          class="hidden whitespace-nowrap font-display text-xs uppercase tracking-widest text-hex-mist hover:text-hex-gold sm:inline"
         >
           Data Dragon ↗
         </a>

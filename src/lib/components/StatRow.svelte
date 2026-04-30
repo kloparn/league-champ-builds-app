@@ -11,7 +11,7 @@
   const max = $derived(perLevel !== undefined ? statAtMaxLevel(base, perLevel) : undefined);
 </script>
 
-<div class="flex items-center justify-between border-b border-hex-border/50 py-1.5 text-sm">
+<div class="flex flex-wrap items-baseline gap-x-2 border-b border-hex-border/50 py-1 text-xs">
   <span class="text-hex-mist">{label}</span>
   <span class="font-mono text-hex-parchment">
     <span class="text-hex-goldHi">{formatStat(base)}</span>

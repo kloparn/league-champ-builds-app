@@ -33,48 +33,29 @@
   <meta property="twitter:image" content={splash} />
 </svelte:head>
 
-<div
-  class="splash-watermark"
-  style:background-image="url({splash})"
-  aria-hidden="true"
-></div>
+<article
+  class="champion-page relative isolate"
+  style:background-image="linear-gradient(180deg, rgba(1, 10, 19, 0.45) 0%, rgba(1, 10, 19, 0.9) 100%), url({splash})"
+>
+  <header class="mx-auto max-w-6xl px-4 pt-4 pb-8 md:px-8 md:pt-6 md:pb-12">
+    <a href="/" class="hex-button !py-1.5 text-xs">← All champions</a>
 
-<article class="relative">
-  <header class="relative isolate overflow-hidden">
-    <div
-      class="absolute inset-0 -z-10 bg-cover bg-center"
-      style:background-image="url({splash})"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="absolute inset-0 -z-10 bg-gradient-to-b from-hex-void/30 via-hex-void/70 to-hex-void"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="absolute inset-y-0 left-0 -z-10 w-1/3 bg-gradient-to-r from-hex-void/80 to-transparent"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="absolute inset-y-0 right-0 -z-10 w-1/3 bg-gradient-to-l from-hex-void/80 to-transparent"
-      aria-hidden="true"
-    ></div>
-
-    <div class="mx-auto max-w-6xl px-4 pt-6 pb-16 md:px-8 md:pt-8 md:pb-24">
-      <a href="/" class="hex-button mb-10 !py-1.5 text-xs">← All champions</a>
-
-      <div class="space-y-3 text-center">
-        <p class="font-display text-xs uppercase tracking-[0.4em] text-hex-cyan drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-          {c.tags.join(' · ')}
-        </p>
-        <h1
-          class="font-display text-5xl uppercase tracking-widest text-hex-goldHi drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] md:text-7xl"
-        >
-          {name}
-        </h1>
-        <p class="font-display text-lg italic text-hex-gold drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] md:text-xl">
-          {c.title}
-        </p>
-      </div>
+    <div class="mt-6 flex flex-col items-center gap-2 text-center md:mt-10 md:gap-3">
+      <p
+        class="font-display text-[10px] uppercase tracking-[0.4em] text-hex-cyan drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] md:text-xs"
+      >
+        {c.tags.join(' · ')}
+      </p>
+      <h1
+        class="font-display text-3xl uppercase leading-none tracking-widest text-hex-goldHi drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] md:text-5xl"
+      >
+        {name}
+      </h1>
+      <p
+        class="font-display text-sm italic text-hex-gold drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] md:text-base"
+      >
+        {c.title}
+      </p>
     </div>
   </header>
 
@@ -127,7 +108,7 @@
         id="tab-build"
         role="tabpanel"
         aria-labelledby="tab-build-trigger"
-        class="grid gap-6 lg:grid-cols-[3fr_2fr]"
+        class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]"
       >
         <div class="space-y-6">
           {#if data.build}
@@ -258,26 +239,12 @@
 </article>
 
 <style>
-  .splash-watermark {
-    position: fixed;
-    inset: 0;
-    z-index: -10;
-    background-size: cover;
-    background-position: center;
-    opacity: 0.18;
-    filter: blur(6px) saturate(1.1);
-    pointer-events: none;
-  }
-
-  .splash-watermark::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(1, 10, 19, 0.7),
-      rgba(1, 10, 19, 0.92)
-    );
+  .champion-page {
+    background-size: auto, cover;
+    background-position: top, center top;
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed, fixed;
+    min-height: calc(100vh - 73px);
   }
 
   .tab-btn {
