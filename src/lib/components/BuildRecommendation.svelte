@@ -8,6 +8,7 @@
   import type { ChampionSpell, Item, Rune, RuneStyle, SummonerSpell } from '$lib/types';
   import { itemIcon, runeIcon, spellIcon } from '$lib/ddragon';
   import { skillSlotLabel, statShardLabel, tierSourceLabel } from '$lib/utils';
+  import SampleDataNotice from './SampleDataNotice.svelte';
 
   interface Props {
     version: string;
@@ -104,6 +105,8 @@
     {/if}
     · Updated {lastUpdated}
   </p>
+
+  <SampleDataNotice />
 
   {#if roleOrder.length === 0 || !roleData || !activeRole}
     <p class="text-sm text-hex-mist">Not enough sample data for this champion yet.</p>

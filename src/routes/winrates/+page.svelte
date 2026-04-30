@@ -2,6 +2,7 @@
   import { displayRole } from '$lib/build-aggregator';
   import { squareIcon } from '$lib/ddragon';
   import { displayName } from '$lib/utils';
+  import SampleDataNotice from '$lib/components/SampleDataNotice.svelte';
   import type { PageData } from './$types';
 
   interface Props {
@@ -67,6 +68,10 @@
       <p class="mx-auto max-w-2xl text-sm text-hex-mist">
         Sorted high to low. Updated {lastUpdated}.
       </p>
+    </div>
+
+    <div class="mx-auto mb-4 max-w-2xl">
+      <SampleDataNotice />
     </div>
 
     <div class="mb-6 flex flex-wrap justify-center gap-2">
