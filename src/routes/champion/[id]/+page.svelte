@@ -1,6 +1,7 @@
 <script lang="ts">
   import AbilityContainer from '$lib/components/AbilityContainer.svelte';
   import BuildRecommendation from '$lib/components/BuildRecommendation.svelte';
+  import ChampionQuickSearch from '$lib/components/ChampionQuickSearch.svelte';
   import DifficultyBar from '$lib/components/DifficultyBar.svelte';
   import SkinCarousel from '$lib/components/SkinCarousel.svelte';
   import StatRow from '$lib/components/StatRow.svelte';
@@ -38,7 +39,14 @@
   style:background-image="linear-gradient(180deg, rgba(1, 10, 19, 0.45) 0%, rgba(1, 10, 19, 0.9) 100%), url({splash})"
 >
   <header class="mx-auto max-w-6xl px-4 pt-4 pb-8 md:px-8 md:pt-6 md:pb-12">
-    <a href="/" class="hex-button !py-1.5 text-xs">← All champions</a>
+    <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <a href="/" class="hex-button shrink-0 self-start !py-1.5 text-xs">← All champions</a>
+      <ChampionQuickSearch
+        champions={data.allChampions}
+        version={data.version}
+        excludeId={c.id}
+      />
+    </div>
 
     <div class="mt-6 flex flex-col items-center gap-2 text-center md:mt-10 md:gap-3">
       <p
