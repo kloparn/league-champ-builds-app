@@ -92,6 +92,7 @@ export interface Item {
   gold: { total: number; purchasable: boolean };
   tags: string[];
   into?: string[];
+  from?: string[];
   maps?: Record<string, boolean>;
 }
 

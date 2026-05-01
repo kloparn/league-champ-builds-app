@@ -373,7 +373,11 @@ function isBoots(items: Record<string, Item>, itemId: number): boolean {
   if (!item) return false;
   if (!item.gold.purchasable) return false;
   if (!item.tags.includes('Boots')) return false;
-  if ((item.into?.length ?? 0) > 0) return false;
+  // Tier-2 named boots upgrade into tier-3, so they have `into` populated; we
+  // still want to count them since most matches end before the upgrade. Use
+  // `from` instead to exclude the basic Boots component (item 1001) and the
+  // cosmetic Arena swap items, which both have empty `from`.
+  if ((item.from?.length ?? 0) === 0) return false;
   return true;
 }
 
