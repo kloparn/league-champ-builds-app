@@ -4,14 +4,40 @@
   import { page } from '$app/state';
 
   let { children } = $props();
+
+  const SITE_URL = 'https://leaguechampions.org';
+  const DEFAULT_OG_IMAGE = `${SITE_URL}/league-background.png`;
+
+  const canonicalUrl = $derived(`${SITE_URL}${page.url.pathname}`);
+
+  const websiteJsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'League Champ Builds',
+    url: SITE_URL,
+    description:
+      'League of Legends champion builds, runes, items, abilities, and win rates — always on the latest patch.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/?q={search_term_string}`,
+      'query-input': 'required name=search_term_string'
+    }
+  });
 </script>
 
 <svelte:head>
-  <meta name="description" content="Browse every League of Legends champion with up-to-date stats, abilities, lore, and skin splash art. Server-rendered and always on the latest patch." />
+  <link rel="canonical" href={canonicalUrl} />
+  <meta name="description" content="Browse every League of Legends champion with up-to-date builds, runes, items, abilities, and win rates. Always on the latest patch." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="League Champ Builds" />
-  <meta property="og:url" content={page.url.href} />
-  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+  <meta property="og:image:alt" content="League Champ Builds" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+  {@html `<script type="application/ld+json">${websiteJsonLd}</script>`}
 </svelte:head>
 
 <a

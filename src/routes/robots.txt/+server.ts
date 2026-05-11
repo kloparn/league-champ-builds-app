@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 
-const SITE_URL = 'https://leaguechampbuilds.netlify.app';
+const SITE_URL = 'https://leaguechampions.org';
 
 export const GET: RequestHandler = () => {
   const body = `User-agent: *

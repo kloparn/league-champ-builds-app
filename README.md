@@ -2,7 +2,7 @@
 
 Server-rendered League of Legends champion explorer. Always on the latest patch via Riot's [Data Dragon](https://developer.riotgames.com/docs/lol#data-dragon) — no redeploy needed when new champions ship.
 
-Live: https://leaguechampbuilds.netlify.app/
+Live: https://leaguechampions.org/
 
 ## Stack
 

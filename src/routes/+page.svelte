@@ -28,13 +28,14 @@
 </script>
 
 <svelte:head>
-  <title>League Champ Builds — All Champions ({data.version})</title>
+  <title>League of Legends Champions, Builds & Win Rates — Patch {data.version}</title>
   <meta
     name="description"
-    content="Browse every League of Legends champion. Up-to-date stats, abilities, and lore on patch {data.version}. Filter by role and search by name."
+    content="All {data.champions.length} League of Legends champions with up-to-date builds, runes, items, abilities, stats, and win rates on patch {data.version}. Search by name and filter by role."
   />
-  <meta property="og:title" content="League Champ Builds — All Champions" />
-  <meta property="og:description" content="Browse every League of Legends champion on patch {data.version}." />
+  <meta name="keywords" content="League of Legends, LoL, champions, builds, runes, items, win rates, patch {data.version}, Data Dragon" />
+  <meta property="og:title" content="League of Legends Champions, Builds & Win Rates — Patch {data.version}" />
+  <meta property="og:description" content="All {data.champions.length} LoL champions with builds, runes, items, and win rates on patch {data.version}." />
 </svelte:head>
 
 <section class="px-4 py-6 md:px-8">

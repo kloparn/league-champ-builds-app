@@ -1,0 +1,17 @@
+{
+  "name": "League Champ Builds",
+  "short_name": "Champ Builds",
+  "description": "League of Legends champion builds, runes, items, and win rates on the latest patch.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#010A13",
+  "theme_color": "#010A13",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

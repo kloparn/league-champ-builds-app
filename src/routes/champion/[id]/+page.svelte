@@ -17,8 +17,42 @@
   const c = $derived(data.champion);
   const name = $derived(displayName(c.id, c.name));
   const splash = $derived(splashArt(c.id, 0));
-  const description = $derived(
-    `${c.lore.slice(0, 200)}${c.lore.length > 200 ? '…' : ''}`
+  const roles = $derived(c.tags.join(', '));
+  const metaDescription = $derived(
+    `${name} build, runes, items, stats, and abilities on League of Legends patch ${data.version}. ${name} is a ${c.tags.join(' / ') || 'League of Legends'} champion${c.title ? ` — ${c.title}` : ''}.`
+  );
+  const ogDescription = $derived(
+    `${c.lore.slice(0, 180)}${c.lore.length > 180 ? '…' : ''}`
+  );
+  const SITE_URL = 'https://leaguechampions.org';
+  const canonicalUrl = $derived(`${SITE_URL}/champion/${c.id}`);
+  const championJsonLd = $derived(
+    JSON.stringify({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Champions', item: `${SITE_URL}/` },
+            { '@type': 'ListItem', position: 2, name, item: canonicalUrl }
+          ]
+        },
+        {
+          '@type': 'VideoGameCharacter',
+          name,
+          alternateName: c.title,
+          description: c.lore,
+          image: splash,
+          url: canonicalUrl,
+          characterAttribute: c.tags,
+          inGame: {
+            '@type': 'VideoGame',
+            name: 'League of Legends',
+            publisher: 'Riot Games'
+          }
+        }
+      ]
+    }).replace(/</g, '\\u003c')
   );
 
   type Tab = 'build' | 'champion';
@@ -26,12 +60,20 @@
 </script>
 
 <svelte:head>
-  <title>{name}, {c.title} — League Champ Builds</title>
-  <meta name="description" content={description} />
-  <meta property="og:title" content="{name} — {c.title}" />
-  <meta property="og:description" content={description} />
+  <title>{name} Build, Runes & Stats — Patch {data.version} | League Champ Builds</title>
+  <meta name="description" content={metaDescription} />
+  <meta name="keywords" content="{name} build, {name} runes, {name} items, {name} guide, {roles}, League of Legends, patch {data.version}" />
+  <link rel="canonical" href={canonicalUrl} />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:title" content="{name}, {c.title} — Build & Runes (Patch {data.version})" />
+  <meta property="og:description" content={ogDescription} />
   <meta property="og:image" content={splash} />
-  <meta property="twitter:image" content={splash} />
+  <meta property="og:image:alt" content="{name} splash art" />
+  <meta name="twitter:image" content={splash} />
+  <meta name="twitter:title" content="{name} Build, Runes & Stats — Patch {data.version}" />
+  <meta name="twitter:description" content={ogDescription} />
+  {@html `<script type="application/ld+json">${championJsonLd}</script>`}
 </svelte:head>
 
 <article

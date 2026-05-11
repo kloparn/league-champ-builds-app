@@ -49,11 +49,14 @@
 </script>
 
 <svelte:head>
-  <title>Win rates — League Champ Builds (Patch {meta.patch})</title>
+  <title>League of Legends Champion Win Rates by Role — Patch {meta.patch}</title>
   <meta
     name="description"
-    content="Champion win rates by role from recent Challenger ranked-solo games on patch {meta.patch}."
+    content="LoL champion win rates by role (Top, Jungle, Mid, Bot, Support) from recent high-elo ranked-solo games on patch {meta.patch}. Sorted high to low."
   />
+  <meta name="keywords" content="LoL win rates, League of Legends win rates, champion tier list, patch {meta.patch}, top, jungle, mid, bot, support" />
+  <meta property="og:title" content="LoL Champion Win Rates by Role — Patch {meta.patch}" />
+  <meta property="og:description" content="Champion win rates by role on patch {meta.patch}, sorted high to low." />
 </svelte:head>
 
 <section class="px-4 py-6 md:px-8">
