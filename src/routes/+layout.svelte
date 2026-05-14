@@ -5,7 +5,7 @@
 
   let { children } = $props();
 
-  const SITE_URL = 'https://leaguechampions.org';
+  const SITE_URL = 'https://leaguebuilds.org';
   const DEFAULT_OG_IMAGE = `${SITE_URL}/league-background.png`;
 
   const canonicalUrl = $derived(`${SITE_URL}${page.url.pathname}`);

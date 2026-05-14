@@ -24,7 +24,7 @@
   const ogDescription = $derived(
     `${c.lore.slice(0, 180)}${c.lore.length > 180 ? '…' : ''}`
   );
-  const SITE_URL = 'https://leaguechampions.org';
+  const SITE_URL = 'https://leaguebuilds.org';
   const canonicalUrl = $derived(`${SITE_URL}/champion/${c.id}`);
   const championJsonLd = $derived(
     JSON.stringify({

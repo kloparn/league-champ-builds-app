@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 
-const SITE_URL = 'https://leaguechampions.org';
+const SITE_URL = 'https://leaguebuilds.org';
 
 export const GET: RequestHandler = () => {
   const body = `User-agent: *
