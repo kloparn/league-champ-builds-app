@@ -125,13 +125,29 @@ export interface RuneStyle {
   slots: RuneSlot[];
 }
 
-export type ChampionRole = 'Fighter' | 'Tank' | 'Support' | 'Mage' | 'Assassin' | 'Marksman';
+/** Riot's lane identifiers from match data — keys directly into `byRole`. */
+export type Lane = 'TOP' | 'JUNGLE' | 'MIDDLE' | 'BOTTOM' | 'UTILITY';
 
-export const CHAMPION_ROLES: readonly ChampionRole[] = [
-  'Fighter',
-  'Tank',
-  'Support',
-  'Mage',
-  'Assassin',
-  'Marksman'
+export const LANES: readonly { value: Lane; label: string; slug: string }[] = [
+  { value: 'TOP', label: 'Top', slug: 'top' },
+  { value: 'JUNGLE', label: 'Jungle', slug: 'jungle' },
+  { value: 'MIDDLE', label: 'Mid', slug: 'mid' },
+  { value: 'BOTTOM', label: 'Bot', slug: 'bot' },
+  { value: 'UTILITY', label: 'Support', slug: 'support' }
 ] as const;
+
+/** URL-friendly slugs used in query strings. Decoupled from the Riot keys so
+ * `?role=support` reads naturally instead of `?role=utility`. */
+export const LANE_SLUG: Record<Lane, string> = {
+  TOP: 'top',
+  JUNGLE: 'jungle',
+  MIDDLE: 'mid',
+  BOTTOM: 'bot',
+  UTILITY: 'support'
+};
+
+export function laneFromSlug(slug: string | null | undefined): Lane | null {
+  if (!slug) return null;
+  const match = LANES.find((l) => l.slug === slug.toLowerCase());
+  return match ? match.value : null;
+}

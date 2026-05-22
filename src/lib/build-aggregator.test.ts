@@ -2,17 +2,21 @@ import { describe, expect, it } from 'vitest';
 import {
   addMatchToState,
   aggregateBuilds,
+  championLanesFromStats,
   createBucketState,
   deserializeBucketState,
   displayRole,
   extractPurchasePaths,
   finalizeState,
+  OFF_META_THRESHOLD,
   patchFromGameVersion,
   rolesByPopularity,
   serializeBucketState,
+  type ChampionBuildStats,
   type MatchDto,
   type MatchParticipant,
   type MatchTimelineDto,
+  type RoleBuildStats,
   type TimelineEvent
 } from './build-aggregator';
 
@@ -606,5 +610,78 @@ describe('incremental state aggregation', () => {
     expect(top?.subRunes).toEqual([8473, 8453]);
     expect(top?.statShards).toEqual([5008, 5008, 5002]);
     expect(top?.count).toBe(2);
+  });
+});
+
+describe('championLanesFromStats', () => {
+  function roleStats(games: number): RoleBuildStats {
+    return {
+      games,
+      wins: 0,
+      winrate: 0,
+      topItems: [],
+      itemPath: [],
+      topBoots: [],
+      topRunes: [],
+      topSummonerSpells: [],
+      skillOrder: []
+    };
+  }
+  function champ(byRole: Record<string, number>): ChampionBuildStats {
+    const games = Object.values(byRole).reduce((a, b) => a + b, 0);
+    const roleStatsMap: Record<string, RoleBuildStats> = {};
+    for (const [r, g] of Object.entries(byRole)) roleStatsMap[r] = roleStats(g);
+    return {
+      championId: 1,
+      championName: 'Test',
+      games,
+      wins: 0,
+      winrate: 0,
+      byRole: roleStatsMap
+    };
+  }
+
+  it('exposes a 5% threshold for off-meta detection', () => {
+    expect(OFF_META_THRESHOLD).toBe(0.05);
+  });
+
+  it('returns an empty list for a champion with zero games', () => {
+    const stats = champ({});
+    expect(championLanesFromStats(stats)).toEqual([]);
+  });
+
+  it('includes lanes at or above the 5% pickShare threshold', () => {
+    // 700 + 200 + 100 = 1000 total → MIDDLE 70%, JUNGLE 20%, TOP 10%
+    const stats = champ({ MIDDLE: 700, JUNGLE: 200, TOP: 100 });
+    expect(championLanesFromStats(stats).sort()).toEqual(['JUNGLE', 'MIDDLE', 'TOP']);
+  });
+
+  it('excludes lanes below the threshold (off-meta picks)', () => {
+    // 850 + 100 + 50 = 1000 → MIDDLE 85%, TOP 10%, UTILITY 5% (just at threshold)
+    // 949 + 51 = 1000 → MIDDLE 94.9%, BOTTOM 5.1% (just over)
+    // off-meta: 970 + 30 = 1000 → MIDDLE 97%, JUNGLE 3% (under)
+    const onlyMid = champ({ MIDDLE: 970, JUNGLE: 30 });
+    expect(championLanesFromStats(onlyMid)).toEqual(['MIDDLE']);
+  });
+
+  it('treats exactly the threshold as in-meta (>=, not >)', () => {
+    // UTILITY 5/100 = exactly 5%
+    const stats = champ({ MIDDLE: 95, UTILITY: 5 });
+    expect(championLanesFromStats(stats).sort()).toEqual(['MIDDLE', 'UTILITY']);
+  });
+
+  it('respects a custom threshold', () => {
+    // MIDDLE 60%, JUNGLE 30%, TOP 10%
+    const stats = champ({ MIDDLE: 600, JUNGLE: 300, TOP: 100 });
+    // At 15% threshold, TOP (10%) is excluded.
+    expect(championLanesFromStats(stats, 0.15).sort()).toEqual(['JUNGLE', 'MIDDLE']);
+    // At 50% threshold, only MIDDLE qualifies.
+    expect(championLanesFromStats(stats, 0.5)).toEqual(['MIDDLE']);
+  });
+
+  it('returns multiple lanes for flex picks', () => {
+    // Vladimir-like spread: 31% top, 44% mid, 25% bot
+    const stats = champ({ TOP: 310, MIDDLE: 440, BOTTOM: 250 });
+    expect(championLanesFromStats(stats).sort()).toEqual(['BOTTOM', 'MIDDLE', 'TOP']);
   });
 });

@@ -138,6 +138,23 @@ export interface ChampionBuildStats {
   byRole: Record<string, RoleBuildStats>;
 }
 
+/** Pick share at or above this threshold means the role is considered a "real"
+ * lane for the champion — used by the home-page filter and the WinrateLabel
+ * off-meta indicator. Anything below is treated as off-meta. */
+export const OFF_META_THRESHOLD = 0.05;
+
+export function championLanesFromStats(
+  stats: ChampionBuildStats,
+  threshold = OFF_META_THRESHOLD
+): string[] {
+  if (stats.games <= 0) return [];
+  const lanes: string[] = [];
+  for (const [role, rb] of Object.entries(stats.byRole)) {
+    if (rb.games / stats.games >= threshold) lanes.push(role);
+  }
+  return lanes;
+}
+
 export interface BuildsData {
   generatedAt: string;
   patch: string;

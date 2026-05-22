@@ -7,6 +7,8 @@
   import StatRow from '$lib/components/StatRow.svelte';
   import { displayName } from '$lib/utils';
   import { splashArt } from '$lib/ddragon';
+  import { page } from '$app/state';
+  import { laneFromSlug } from '$lib/types';
   import type { PageData } from './$types';
 
   interface Props {
@@ -15,6 +17,7 @@
 
   let { data }: Props = $props();
   const c = $derived(data.champion);
+  const initialRole = $derived(laneFromSlug(page.url.searchParams.get('role')));
   const name = $derived(displayName(c.id, c.name));
   const splash = $derived(splashArt(c.id, 0));
   const roles = $derived(c.tags.join(', '));
@@ -172,6 +175,7 @@
               summonerSpells={data.summonerSpells}
               runeStyles={data.runeStyles}
               items={data.items}
+              {initialRole}
             />
           {:else}
             <section class="hex-frame rounded-md p-5">

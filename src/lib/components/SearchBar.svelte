@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { CHAMPION_ROLES, type ChampionRole } from '$lib/types';
+  import { LANES, type Lane } from '$lib/types';
 
   interface Props {
     query: string;
-    role: ChampionRole | '';
+    lane: Lane | '';
     count: number;
   }
 
-  let { query = $bindable(), role = $bindable(), count }: Props = $props();
+  let { query = $bindable(), lane = $bindable(), count }: Props = $props();
 </script>
 
 <div
@@ -40,13 +40,13 @@
       <label class="flex items-center gap-2">
         <span class="font-display text-xs uppercase tracking-widest text-hex-mist">Role</span>
         <select
-          bind:value={role}
+          bind:value={lane}
           class="hex-input min-w-[8rem] appearance-none bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat pr-8"
           style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 12 12%22 fill=%22none%22 stroke=%22%23C8AA6E%22 stroke-width=%221.5%22><path d=%22m3 4.5 3 3 3-3%22/></svg>');"
         >
           <option value="">All roles</option>
-          {#each CHAMPION_ROLES as r (r)}
-            <option value={r}>{r}</option>
+          {#each LANES as l (l.value)}
+            <option value={l.value}>{l.label}</option>
           {/each}
         </select>
       </label>

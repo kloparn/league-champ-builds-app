@@ -22,6 +22,9 @@
     summonerSpells: Record<number, SummonerSpell>;
     runeStyles: RuneStyle[];
     items: Record<string, Item>;
+    /** Pre-selected role tab, e.g. forwarded from the home-page filter via ?role=JUNGLE.
+     * Ignored if the champion has no bucket for that role. */
+    initialRole?: string | null;
   }
 
   let {
@@ -33,7 +36,8 @@
     championSpells,
     summonerSpells,
     runeStyles,
-    items
+    items,
+    initialRole = null
   }: Props = $props();
 
   const tierLabel = $derived(tierSourceLabel(tiers));
@@ -58,7 +62,10 @@
 
   const roleOrder = $derived(rolesByPopularity(build.byRole ?? {}));
   let selectedRole = $state<string | null>(null);
-  const activeRole = $derived(selectedRole ?? roleOrder[0] ?? null);
+  const seededRole = $derived(
+    initialRole && roleOrder.includes(initialRole) ? initialRole : null
+  );
+  const activeRole = $derived(selectedRole ?? seededRole ?? roleOrder[0] ?? null);
   const roleData = $derived(activeRole ? build.byRole?.[activeRole] : undefined);
 
   const stylesById = $derived(

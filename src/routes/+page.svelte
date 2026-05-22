@@ -2,7 +2,7 @@
   import HeroCard from '$lib/components/HeroCard.svelte';
   import SearchBar from '$lib/components/SearchBar.svelte';
   import { displayName } from '$lib/utils';
-  import type { ChampionRole } from '$lib/types';
+  import type { Lane } from '$lib/types';
   import type { PageData } from './$types';
 
   interface Props {
@@ -12,12 +12,15 @@
   let { data }: Props = $props();
 
   let query = $state('');
-  let role = $state<ChampionRole | ''>('');
+  let lane = $state<Lane | ''>('');
 
   const filtered = $derived.by(() => {
     const q = query.trim().toLowerCase();
     return data.champions.filter((c) => {
-      if (role && !c.tags.includes(role)) return false;
+      if (lane) {
+        const lanes = data.championLanes[c.id];
+        if (!lanes || !lanes.includes(lane)) return false;
+      }
       if (!q) return true;
       return (
         displayName(c.id, c.name).toLowerCase().includes(q) ||
@@ -53,7 +56,7 @@
       </p>
     </div>
 
-    <SearchBar bind:query bind:role count={filtered.length} />
+    <SearchBar bind:query bind:lane count={filtered.length} />
 
     {#if filtered.length === 0}
       <p class="py-16 text-center text-hex-mist">No champions match your search.</p>
@@ -63,7 +66,7 @@
       >
         {#each filtered as champion (champion.id)}
           <li class="animate-slide-up">
-            <HeroCard {champion} />
+            <HeroCard {champion} {lane} />
           </li>
         {/each}
       </ul>

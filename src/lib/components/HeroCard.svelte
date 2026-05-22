@@ -1,18 +1,24 @@
 <script lang="ts">
-  import type { ChampionSummary } from '$lib/types';
+  import { LANE_SLUG, type ChampionSummary, type Lane } from '$lib/types';
   import { displayName } from '$lib/utils';
   import { loadingArt } from '$lib/ddragon';
 
   interface Props {
     champion: ChampionSummary;
+    /** When set, the link forwards the lane so the champion page opens with
+     * that role tab pre-selected. */
+    lane?: Lane | '';
   }
 
-  let { champion }: Props = $props();
+  let { champion, lane = '' }: Props = $props();
   const name = $derived(displayName(champion.id, champion.name));
+  const href = $derived(
+    lane ? `/champion/${champion.id}?role=${LANE_SLUG[lane]}` : `/champion/${champion.id}`
+  );
 </script>
 
 <a
-  href="/champion/{champion.id}"
+  {href}
   class="group relative block overflow-hidden rounded-md border border-hex-border bg-hex-shadow transition-all duration-300 hover:-translate-y-1 hover:border-hex-gold/80 hover:shadow-hexHover"
   aria-label="View {name}"
 >
