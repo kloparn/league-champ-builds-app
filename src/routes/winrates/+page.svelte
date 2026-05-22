@@ -3,6 +3,7 @@
   import { squareIcon } from '$lib/ddragon';
   import { displayName } from '$lib/utils';
   import SampleDataNotice from '$lib/components/SampleDataNotice.svelte';
+  import WinrateLabel from '$lib/components/WinrateLabel.svelte';
   import type { PageData } from './$types';
 
   interface Props {
@@ -33,12 +34,23 @@
 
         if (selectedRole === 'ALL') {
           if (build.games < MIN_GAMES) return null;
-          return { champion: c, winrate: build.winrate, games: build.games };
+          return {
+            champion: c,
+            winrate: build.winrate,
+            games: build.games,
+            relativeShare: undefined as number | undefined
+          };
         }
 
         const roleStats = build.byRole?.[selectedRole];
         if (!roleStats || roleStats.games < MIN_GAMES) return null;
-        return { champion: c, winrate: roleStats.winrate, games: roleStats.games };
+        const relativeShare = build.games > 0 ? roleStats.games / build.games : undefined;
+        return {
+          champion: c,
+          winrate: roleStats.winrate,
+          games: roleStats.games,
+          relativeShare
+        };
       })
       .filter((r): r is NonNullable<typeof r> => r !== null)
       .sort((a, b) => b.winrate - a.winrate);
@@ -123,7 +135,12 @@
                 <div class="text-[11px] text-hex-mist">{row.champion.title}</div>
               </div>
               <div class="text-right font-mono text-sm text-hex-cyan">
-                {(row.winrate * 100).toFixed(1)}%
+                <WinrateLabel
+                  winrate={row.winrate}
+                  sampleSize={row.games}
+                  relativeShare={row.relativeShare}
+                  warningContext="of this champion's matches"
+                />
               </div>
             </a>
           </li>

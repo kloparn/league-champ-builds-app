@@ -9,6 +9,7 @@
   import { itemIcon, runeIcon, spellIcon } from '$lib/ddragon';
   import { skillSlotLabel, statShardLabel, tierSourceLabel } from '$lib/utils';
   import SampleDataNotice from './SampleDataNotice.svelte';
+  import WinrateLabel from './WinrateLabel.svelte';
 
   interface Props {
     version: string;
@@ -143,9 +144,14 @@
     </div>
 
     <p class="mb-4 font-mono text-xs text-hex-mist">
-      <span class="text-hex-cyan">{(roleData.winrate * 100).toFixed(1)}%</span> wr in {displayRole(
-        activeRole
-      )}
+      <span class="text-hex-cyan">
+        <WinrateLabel
+          winrate={roleData.winrate}
+          sampleSize={roleData.games}
+          relativeShare={build.games > 0 ? roleData.games / build.games : undefined}
+          warningContext="of this champion's matches"
+        />
+      </span> wr in {displayRole(activeRole)}
     </p>
 
     {#if pathPerSlot.length > 0 || topBoots}
@@ -166,12 +172,7 @@
               </span>
               <span class="font-mono text-[10px] text-hex-mist/70">any step</span>
             </div>
-            <div
-              class="flex items-center gap-3"
-              title={meta?.name
-                ? `${meta.name} — ${(topBoots.winrate * 100).toFixed(1)}% wr`
-                : `${(topBoots.winrate * 100).toFixed(1)}% wr`}
-            >
+            <div class="flex items-center gap-3">
               <img
                 src={itemIcon(version, topBoots.itemId)}
                 alt={meta?.name ?? `Item ${topBoots.itemId}`}
@@ -185,9 +186,16 @@
                   {meta?.name ?? `#${topBoots.itemId}`}
                 </div>
                 <div class="mt-0.5 font-mono text-[11px] text-hex-mist">
-                  {(topBoots.pickRate * 100).toFixed(0)}% pick · {(
-                    topBoots.winrate * 100
-                  ).toFixed(1)}% wr
+                  {(topBoots.pickRate * 100).toFixed(0)}% pick ·
+                  <WinrateLabel
+                    winrate={topBoots.winrate}
+                    sampleSize={topBoots.count}
+                    relativeShare={roleData.games > 0
+                      ? topBoots.count / roleData.games
+                      : undefined}
+                    sampleLabel="picks"
+                    warningContext="of this role's matches"
+                  /> wr
                 </div>
               </div>
             </div>
@@ -212,12 +220,7 @@
               {#each slot as entry, altIdx (entry.itemId)}
                 {@const meta = items[String(entry.itemId)]}
                 {@const isPrimary = altIdx === 0}
-                <li
-                  class="flex items-center gap-3"
-                  title={meta?.name
-                    ? `${meta.name} — ${(entry.winrate * 100).toFixed(1)}% wr`
-                    : `${(entry.winrate * 100).toFixed(1)}% wr`}
-                >
+                <li class="flex items-center gap-3">
                   <img
                     src={itemIcon(version, entry.itemId)}
                     alt={meta?.name ?? `Item ${entry.itemId}`}
@@ -240,9 +243,16 @@
                       {meta?.name ?? `#${entry.itemId}`}
                     </div>
                     <div class="mt-0.5 font-mono text-[11px] text-hex-mist">
-                      {(entry.pickRate * 100).toFixed(0)}% pick · {(entry.winrate * 100).toFixed(
-                        1
-                      )}% wr
+                      {(entry.pickRate * 100).toFixed(0)}% pick ·
+                      <WinrateLabel
+                        winrate={entry.winrate}
+                        sampleSize={entry.count}
+                        relativeShare={roleData.games > 0
+                          ? entry.count / roleData.games
+                          : undefined}
+                        sampleLabel="picks"
+                        warningContext="of this role's matches"
+                      /> wr
                     </div>
                   </div>
                 </li>
@@ -293,7 +303,14 @@
         {/if}
         <span class="text-sm text-hex-parchment/90">{s2?.name ?? `#${topSpells.spell2}`}</span>
         <span class="ml-auto font-mono text-[11px] text-hex-mist">
-          {spellsPickRate.toFixed(0)}% · {(topSpells.winrate * 100).toFixed(1)}% wr
+          {spellsPickRate.toFixed(0)}% ·
+          <WinrateLabel
+            winrate={topSpells.winrate}
+            sampleSize={topSpells.count}
+            relativeShare={roleData.games > 0 ? topSpells.count / roleData.games : undefined}
+            sampleLabel="picks"
+            warningContext="of this role's matches"
+          /> wr
         </span>
       </div>
     {/if}
@@ -354,7 +371,14 @@
       <div class="mb-2 flex items-baseline justify-between">
         <h3 class="font-display text-sm uppercase tracking-widest text-hex-cyan">Runes</h3>
         <div class="font-mono text-[11px] text-hex-mist">
-          {runePickRate.toFixed(0)}% · {(topRune.winrate * 100).toFixed(1)}% wr
+          {runePickRate.toFixed(0)}% ·
+          <WinrateLabel
+            winrate={topRune.winrate}
+            sampleSize={topRune.count}
+            relativeShare={roleData.games > 0 ? topRune.count / roleData.games : undefined}
+            sampleLabel="picks"
+            warningContext="of this role's matches"
+          /> wr
         </div>
       </div>
 
