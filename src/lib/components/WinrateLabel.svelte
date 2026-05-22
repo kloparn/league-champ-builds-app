@@ -40,7 +40,7 @@
 
 <span class="inline-flex items-baseline gap-1 whitespace-nowrap">
   <span>{pct}%</span>
-  <span class="mark info" tabindex="0" aria-label={sampleTooltip} role="img">
+  <button type="button" class="mark info" aria-label={sampleTooltip}>
     <svg width="11" height="11" viewBox="0 0 16 16" aria-hidden="true">
       <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2" />
       <path
@@ -53,9 +53,9 @@
       <circle cx="8" cy="11.2" r="0.7" fill="currentColor" />
     </svg>
     <span class="tip" role="tooltip">{sampleTooltip}</span>
-  </span>
+  </button>
   {#if offMeta}
-    <span class="mark warn" tabindex="0" aria-label={warningTooltip} role="img">
+    <button type="button" class="mark warn" aria-label={warningTooltip}>
       <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true">
         <path
           d="M8 2.2 14.3 13.2H1.7L8 2.2Z"
@@ -68,7 +68,7 @@
         <circle cx="8" cy="11.6" r="0.6" fill="currentColor" />
       </svg>
       <span class="tip" role="tooltip">{warningTooltip}</span>
-    </span>
+    </button>
   {/if}
 </span>
 
@@ -79,6 +79,12 @@
     align-items: center;
     cursor: help;
     transform: translateY(1px);
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
   }
 
   .mark.info {

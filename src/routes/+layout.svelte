@@ -1,6 +1,8 @@
 <script lang="ts">
   import '../app.css';
   import Footer from '$lib/components/Footer.svelte';
+  import ConsentBanner from '$lib/components/ConsentBanner.svelte';
+  import ConsentModal from '$lib/components/ConsentModal.svelte';
   import { page } from '$app/state';
 
   let { children } = $props();
@@ -100,3 +102,6 @@
 
   <Footer />
 </div>
+
+<ConsentBanner />
+<ConsentModal />

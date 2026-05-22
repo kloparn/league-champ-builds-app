@@ -7,6 +7,8 @@ import type {
 } from './types';
 
 const DDRAGON = 'https://ddragon.leagueoflegends.com';
+const CDRAGON = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default';
+const MERAKI = 'https://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/champions';
 const VERSION_TTL_MS = 60 * 60 * 1000;
 const CHAMPIONS_TTL_MS = 60 * 60 * 1000;
 const CHAMPION_TTL_MS = 24 * 60 * 60 * 1000;
@@ -70,6 +72,59 @@ export async function getChampions(
   return { version, champions };
 }
 
+interface CDragonChampion {
+  tacticalInfo: { difficulty: number; damageType: string };
+  playstyleInfo: { damage: number; durability: number };
+}
+
+interface MerakiStat {
+  flat: number;
+  perLevel: number;
+}
+interface MerakiChampion {
+  stats: {
+    attackDamage?: MerakiStat;
+  };
+}
+
+async function backfillStats(champion: ChampionDetail, fetchFn: typeof fetch): Promise<void> {
+  // DDragon currently ships attackdamageperlevel: 0 for every champion.
+  // Pull the real value from Meraki Analytics, which mirrors the live game stats.
+  if (champion.stats.attackdamageperlevel) return;
+  try {
+    const res = await fetchFn(`${MERAKI}/${champion.id}.json`);
+    if (!res.ok) return;
+    const meraki = (await res.json()) as MerakiChampion;
+    const ad = meraki.stats.attackDamage?.perLevel;
+    if (typeof ad === 'number' && ad > 0) {
+      champion.stats.attackdamageperlevel = ad;
+    }
+  } catch {
+    // Best-effort; if Meraki is unreachable we just keep the upstream zero.
+  }
+}
+
+async function backfillInfo(champion: ChampionDetail, fetchFn: typeof fetch): Promise<void> {
+  const { attack, defense, magic, difficulty } = champion.info;
+  if (attack || defense || magic || difficulty) return;
+  try {
+    const res = await fetchFn(`${CDRAGON}/v1/champions/${champion.key}.json`);
+    if (!res.ok) return;
+    const cd = (await res.json()) as CDragonChampion;
+    const scale = (v: number) => Math.round(v * 3); // 1→3, 2→6, 3→9
+    const dmgType = cd.tacticalInfo.damageType;
+    const dmg = scale(cd.playstyleInfo.damage);
+    champion.info = {
+      attack: dmgType === 'kPhysical' || dmgType === 'kMixed' ? dmg : 0,
+      magic: dmgType === 'kMagic' || dmgType === 'kMixed' ? dmg : 0,
+      defense: scale(cd.playstyleInfo.durability),
+      difficulty: scale(cd.tacticalInfo.difficulty)
+    };
+  } catch {
+    // Backfill is best-effort; leave the zeros if CommunityDragon is unreachable.
+  }
+}
+
 export async function getChampion(
   id: string,
   fetchFn: typeof fetch
@@ -86,6 +141,7 @@ export async function getChampion(
   const data = (await res.json()) as { data: Record<string, ChampionDetail> };
   const champion = data.data[id];
   if (!champion) return null;
+  await Promise.all([backfillInfo(champion, fetchFn), backfillStats(champion, fetchFn)]);
   setCached(cacheKey, champion, CHAMPION_TTL_MS);
   return { version, champion };
 }

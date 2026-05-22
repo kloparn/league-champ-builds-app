@@ -8,14 +8,16 @@
   }
 
   let { label, base, perLevel }: Props = $props();
-  const max = $derived(perLevel !== undefined ? statAtMaxLevel(base, perLevel) : undefined);
+  const max = $derived(
+    perLevel !== undefined && perLevel !== 0 ? statAtMaxLevel(base, perLevel) : undefined
+  );
 </script>
 
 <div class="flex flex-wrap items-baseline gap-x-2 border-b border-hex-border/50 py-1 text-xs">
   <span class="text-hex-mist">{label}</span>
   <span class="font-mono text-hex-parchment">
     <span class="text-hex-goldHi">{formatStat(base)}</span>
-    {#if perLevel !== undefined && max !== undefined}
+    {#if perLevel !== undefined && perLevel !== 0 && max !== undefined}
       <span class="text-hex-mist"> → </span>
       <span class="text-hex-cyan">{formatStat(max)}</span>
       <span class="text-hex-mist/70"> (+{formatStat(perLevel)}/lvl)</span>

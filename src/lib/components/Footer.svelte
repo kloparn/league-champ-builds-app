@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { openConsentModal } from '$lib/consent.svelte';
+
   const year = new Date().getFullYear();
 </script>
 
@@ -8,7 +10,14 @@
       League Champ Builds
     </p>
     <p class="text-xs text-hex-mist">
-      Created by Adam Håkansson. © {year}
+      Created by Adam Håkansson. © {year} ·
+      <button
+        type="button"
+        onclick={openConsentModal}
+        class="text-hex-gold hover:text-hex-goldHi underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-hex-cyan/60"
+      >
+        Cookie preferences
+      </button>
     </p>
     <p class="max-w-2xl text-[11px] leading-relaxed text-hex-mist/70">
       League Champ Builds isn't endorsed by Riot Games and doesn't reflect the views or opinions
