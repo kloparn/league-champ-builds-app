@@ -206,7 +206,15 @@
             <h2 class="mb-3 font-display text-xl uppercase tracking-widest text-hex-gold">
               Stats
             </h2>
-            <p class="mb-3 font-mono text-xs text-hex-mist">Base → Level 18</p>
+            <div
+              class="mb-1 grid grid-cols-[1fr_auto_1.25rem_auto_3rem] items-baseline gap-x-2 border-b border-hex-border/60 pb-1 font-mono text-[10px] uppercase tracking-widest text-hex-mist/70"
+            >
+              <span></span>
+              <span class="text-right">Base</span>
+              <span></span>
+              <span class="text-right">Lv 18</span>
+              <span class="text-right">/lvl</span>
+            </div>
             <div class="space-y-0.5">
               <StatRow label="Health" base={c.stats.hp} perLevel={c.stats.hpperlevel} />
               <StatRow
@@ -214,7 +222,15 @@
                 base={c.stats.hpregen}
                 perLevel={c.stats.hpregenperlevel}
               />
-              <StatRow label={c.partype} base={c.stats.mp} perLevel={c.stats.mpperlevel} />
+              {#if c.partype && c.partype !== 'None'}
+                <StatRow label={c.partype} base={c.stats.mp} perLevel={c.stats.mpperlevel} />
+              {:else}
+                <div
+                  class="grid grid-cols-[1fr_auto_1.25rem_auto_3rem] items-baseline gap-x-2 border-b border-hex-border/40 py-1.5 text-xs"
+                >
+                  <span class="col-span-5 italic text-hex-mist">No resource use</span>
+                </div>
+              {/if}
               <StatRow label="Armor" base={c.stats.armor} perLevel={c.stats.armorperlevel} />
               <StatRow
                 label="Magic Resist"

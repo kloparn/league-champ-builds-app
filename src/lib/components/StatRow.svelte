@@ -11,16 +11,23 @@
   const max = $derived(
     perLevel !== undefined && perLevel !== 0 ? statAtMaxLevel(base, perLevel) : undefined
   );
+  const showsScaling = $derived(
+    perLevel !== undefined && perLevel !== 0 && max !== undefined
+  );
 </script>
 
-<div class="flex flex-wrap items-baseline gap-x-2 border-b border-hex-border/50 py-1 text-xs">
-  <span class="text-hex-mist">{label}</span>
-  <span class="font-mono text-hex-parchment">
-    <span class="text-hex-goldHi">{formatStat(base)}</span>
-    {#if perLevel !== undefined && perLevel !== 0 && max !== undefined}
-      <span class="text-hex-mist"> → </span>
-      <span class="text-hex-cyan">{formatStat(max)}</span>
-      <span class="text-hex-mist/70"> (+{formatStat(perLevel)}/lvl)</span>
-    {/if}
+<div
+  class="grid grid-cols-[1fr_auto_1.25rem_auto_3rem] items-baseline gap-x-2 border-b border-hex-border/40 py-1.5 text-xs"
+>
+  <span class="truncate text-hex-mist">{label}</span>
+  <span class="text-right font-mono tabular-nums text-hex-goldHi">{formatStat(base)}</span>
+  <span class="text-center text-hex-mist/60" aria-hidden="true">
+    {showsScaling ? '→' : ''}
+  </span>
+  <span class="text-right font-mono tabular-nums text-hex-cyan">
+    {showsScaling ? formatStat(max!) : ''}
+  </span>
+  <span class="text-right font-mono tabular-nums text-hex-mist/60">
+    {showsScaling ? `+${formatStat(perLevel!)}` : ''}
   </span>
 </div>

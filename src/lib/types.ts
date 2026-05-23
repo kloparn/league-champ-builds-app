@@ -89,7 +89,11 @@ export interface ChampionDetail extends ChampionSummary {
 export interface Item {
   id: string;
   name: string;
-  gold: { total: number; purchasable: boolean };
+  /** Rich HTML description with DDragon-specific tags (<active>, <attention>, etc.) */
+  description?: string;
+  /** Short plain-text summary, no HTML. */
+  plaintext?: string;
+  gold: { base?: number; total: number; sell?: number; purchasable: boolean };
   tags: string[];
   into?: string[];
   from?: string[];

@@ -47,11 +47,20 @@
 
 <div class="border-b border-hex-border bg-hex-deep/70">
   <div
-    class="grid grid-cols-[2.5rem_3rem_minmax(0,1fr)_6rem_5rem_5rem] items-stretch text-[11px] uppercase tracking-wider text-hex-mist"
+    class="grid grid-cols-[2.5rem_3rem_minmax(0,1fr)_7.5rem_6rem_5rem] items-stretch text-[11px] uppercase tracking-wider text-hex-mist"
   >
-    <span class="flex items-center justify-center px-2 py-2.5 font-display text-hex-mist"
-      >Rank</span
+    <button
+      type="button"
+      onclick={() => onSort('score')}
+      aria-pressed={sort === 'score'}
+      title="Rank reflects Hex Score — click to sort"
+      class="flex items-center justify-center px-1 py-2.5 font-display uppercase tracking-wider transition-colors duration-100 hover:bg-hex-panel/40 hover:text-hex-goldHi focus:outline-none focus-visible:bg-hex-panel/40 focus-visible:text-hex-goldHi {sort ===
+      'score'
+        ? 'text-hex-gold'
+        : ''}"
     >
+      Rank
+    </button>
     <span aria-hidden="true"></span>
 
     {#each COLUMNS as col, i (col.key)}
@@ -61,7 +70,7 @@
         onclick={() => onSort(col.key)}
         aria-pressed={active}
         title={col.title ?? col.label}
-        class="flex items-center gap-1.5 px-3 py-2.5 font-display uppercase tracking-wider transition-colors hover:bg-hex-panel/40 hover:text-hex-goldHi focus:outline-none focus-visible:bg-hex-panel/40 focus-visible:text-hex-goldHi sm:px-4 {i >
+        class="flex items-center gap-1 overflow-hidden px-2 py-2.5 font-display uppercase tracking-wider transition-colors hover:bg-hex-panel/40 hover:text-hex-goldHi focus:outline-none focus-visible:bg-hex-panel/40 focus-visible:text-hex-goldHi sm:px-3 {i >
         0
           ? 'border-l border-hex-border/40'
           : ''} {col.align === 'right' ? 'justify-end text-right' : 'text-left'} {active

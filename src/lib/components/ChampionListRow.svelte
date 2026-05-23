@@ -69,7 +69,7 @@
 
 <a
   {href}
-  class="group grid grid-cols-[2.5rem_3rem_minmax(0,1fr)_6rem_5rem_5rem] items-center border-b border-hex-border/30 bg-hex-shadow/40 transition-colors duration-100 hover:bg-hex-panel/70"
+  class="group grid grid-cols-[2.5rem_3rem_minmax(0,1fr)_7.5rem_6rem_5rem] items-center border-b border-hex-border/30 bg-hex-shadow/40 transition-colors duration-100 hover:bg-hex-panel/70"
   aria-label="View {name}"
 >
   {#if rank !== null && isRankClickable}

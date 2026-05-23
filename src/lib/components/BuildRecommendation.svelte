@@ -7,8 +7,16 @@
   } from '$lib/build-aggregator';
   import type { ChampionSpell, Item, Rune, RuneStyle, SummonerSpell } from '$lib/types';
   import { itemIcon, runeIcon, spellIcon } from '$lib/ddragon';
-  import { skillSlotLabel, statShardLabel, tierSourceLabel } from '$lib/utils';
+  import {
+    skillSlotLabel,
+    statShardDescription,
+    statShardIconPath,
+    statShardLabel,
+    STAT_SHARD_ROWS,
+    tierSourceLabel
+  } from '$lib/utils';
   import SampleDataNotice from './SampleDataNotice.svelte';
+  import Tooltip from './Tooltip.svelte';
   import WinrateLabel from './WinrateLabel.svelte';
 
   interface Props {
@@ -180,14 +188,35 @@
               <span class="font-mono text-[10px] text-hex-mist/70">any step</span>
             </div>
             <div class="flex items-center gap-3">
-              <img
-                src={itemIcon(version, topBoots.itemId)}
-                alt={meta?.name ?? `Item ${topBoots.itemId}`}
-                width="44"
-                height="44"
-                class="shrink-0 rounded border border-hex-gold/40 bg-hex-void/40"
-                loading="lazy"
-              />
+              <Tooltip>
+                {#snippet children()}
+                  <img
+                    src={itemIcon(version, topBoots.itemId)}
+                    alt={meta?.name ?? `Item ${topBoots.itemId}`}
+                    width="44"
+                    height="44"
+                    class="shrink-0 cursor-help rounded border border-hex-gold/40 bg-hex-void/40"
+                    loading="lazy"
+                  />
+                {/snippet}
+                {#snippet content()}
+                  <div class="font-display text-sm uppercase tracking-wider text-hex-goldHi">
+                    {meta?.name ?? `Item ${topBoots.itemId}`}
+                  </div>
+                  {#if meta?.gold?.total}
+                    <div class="mt-0.5 font-mono text-[10px] text-hex-gold">
+                      {meta.gold.total} gold
+                    </div>
+                  {/if}
+                  {#if meta?.description}
+                    <div class="ddragon-html mt-1.5 text-[11px] leading-relaxed">
+                      {@html meta.description}
+                    </div>
+                  {:else if meta?.plaintext}
+                    <p class="mt-1.5 text-[11px] leading-relaxed">{meta.plaintext}</p>
+                  {/if}
+                {/snippet}
+              </Tooltip>
               <div class="min-w-0 flex-1">
                 <div class="font-display text-sm leading-tight text-hex-goldHi">
                   {meta?.name ?? `#${topBoots.itemId}`}
@@ -228,16 +257,37 @@
                 {@const meta = items[String(entry.itemId)]}
                 {@const isPrimary = altIdx === 0}
                 <li class="flex items-center gap-3">
-                  <img
-                    src={itemIcon(version, entry.itemId)}
-                    alt={meta?.name ?? `Item ${entry.itemId}`}
-                    width={isPrimary ? 44 : 32}
-                    height={isPrimary ? 44 : 32}
-                    class="shrink-0 rounded border bg-hex-void/40 {isPrimary
-                      ? 'border-hex-gold/40'
-                      : 'ml-3 border-hex-border/60 opacity-80'}"
-                    loading="lazy"
-                  />
+                  <Tooltip>
+                    {#snippet children()}
+                      <img
+                        src={itemIcon(version, entry.itemId)}
+                        alt={meta?.name ?? `Item ${entry.itemId}`}
+                        width={isPrimary ? 44 : 32}
+                        height={isPrimary ? 44 : 32}
+                        class="shrink-0 cursor-help rounded border bg-hex-void/40 {isPrimary
+                          ? 'border-hex-gold/40'
+                          : 'ml-3 border-hex-border/60 opacity-80'}"
+                        loading="lazy"
+                      />
+                    {/snippet}
+                    {#snippet content()}
+                      <div class="font-display text-sm uppercase tracking-wider text-hex-goldHi">
+                        {meta?.name ?? `Item ${entry.itemId}`}
+                      </div>
+                      {#if meta?.gold?.total}
+                        <div class="mt-0.5 font-mono text-[10px] text-hex-gold">
+                          {meta.gold.total} gold
+                        </div>
+                      {/if}
+                      {#if meta?.description}
+                        <div class="ddragon-html mt-1.5 text-[11px] leading-relaxed">
+                          {@html meta.description}
+                        </div>
+                      {:else if meta?.plaintext}
+                        <p class="mt-1.5 text-[11px] leading-relaxed">{meta.plaintext}</p>
+                      {/if}
+                    {/snippet}
+                  </Tooltip>
                   <div class="min-w-0 flex-1">
                     <div
                       class="font-display leading-tight {isPrimary
@@ -287,26 +337,46 @@
       </h3>
       <div class="mb-5 flex items-center gap-3">
         {#if s1}
-          <img
-            src={spellIcon(version, s1.image.full)}
-            alt={s1.name}
-            width="40"
-            height="40"
-            class="rounded border border-hex-gold/30"
-            loading="lazy"
-          />
+          <Tooltip>
+            {#snippet children()}
+              <img
+                src={spellIcon(version, s1.image.full)}
+                alt={s1.name}
+                width="40"
+                height="40"
+                class="cursor-help rounded border border-hex-gold/30"
+                loading="lazy"
+              />
+            {/snippet}
+            {#snippet content()}
+              <div class="font-display text-sm uppercase tracking-wider text-hex-goldHi">
+                {s1.name}
+              </div>
+              <p class="ddragon-html mt-1.5 text-[11px] leading-relaxed">{@html s1.description}</p>
+            {/snippet}
+          </Tooltip>
         {/if}
         <span class="text-sm text-hex-parchment/90">{s1?.name ?? `#${topSpells.spell1}`}</span>
         <span class="text-hex-mist">+</span>
         {#if s2}
-          <img
-            src={spellIcon(version, s2.image.full)}
-            alt={s2.name}
-            width="40"
-            height="40"
-            class="rounded border border-hex-gold/30"
-            loading="lazy"
-          />
+          <Tooltip>
+            {#snippet children()}
+              <img
+                src={spellIcon(version, s2.image.full)}
+                alt={s2.name}
+                width="40"
+                height="40"
+                class="cursor-help rounded border border-hex-gold/30"
+                loading="lazy"
+              />
+            {/snippet}
+            {#snippet content()}
+              <div class="font-display text-sm uppercase tracking-wider text-hex-goldHi">
+                {s2.name}
+              </div>
+              <p class="ddragon-html mt-1.5 text-[11px] leading-relaxed">{@html s2.description}</p>
+            {/snippet}
+          </Tooltip>
         {/if}
         <span class="text-sm text-hex-parchment/90">{s2?.name ?? `#${topSpells.spell2}`}</span>
         <span class="ml-auto font-mono text-[11px] text-hex-mist">
@@ -324,9 +394,12 @@
 
     {@const skillOrder = roleData.skillOrder ?? []}
     {#if skillOrder.some((s) => s.slot > 0)}
-      <h3 class="mb-2 font-display text-sm uppercase tracking-widest text-hex-cyan">
-        Skill order
-      </h3>
+      <div class="mb-2 flex items-baseline gap-2">
+        <h3 class="font-display text-sm uppercase tracking-widest text-hex-cyan">
+          Skill order
+        </h3>
+        <span class="font-mono text-[11px] italic text-hex-mist/80">— what to level when</span>
+      </div>
       <div class="mb-5 overflow-x-auto">
         <div
           class="grid items-center gap-0.5 text-center"
@@ -341,14 +414,31 @@
             {@const spell = championSpells[slot - 1]}
             <div class="flex items-center gap-1.5 pr-2">
               {#if spell}
-                <img
-                  src={spellIcon(version, spell.image.full)}
-                  alt={spell.name}
-                  width="22"
-                  height="22"
-                  class="rounded-sm border border-hex-gold/30"
-                  loading="lazy"
-                />
+                <Tooltip>
+                  {#snippet children()}
+                    <img
+                      src={spellIcon(version, spell.image.full)}
+                      alt={spell.name}
+                      width="22"
+                      height="22"
+                      class="cursor-help rounded-sm border border-hex-gold/30"
+                      loading="lazy"
+                    />
+                  {/snippet}
+                  {#snippet content()}
+                    <div
+                      class="font-display text-sm uppercase tracking-wider text-hex-goldHi"
+                    >
+                      <span class="mr-1 text-hex-gold">{skillSlotLabel(slot)}</span>
+                      {spell.name}
+                    </div>
+                    {#if spell.description}
+                      <p class="ddragon-html mt-1.5 text-[11px] leading-relaxed">
+                        {@html spell.description}
+                      </p>
+                    {/if}
+                  {/snippet}
+                </Tooltip>
               {/if}
               <span class="font-display text-[11px] font-bold text-hex-gold">
                 {skillSlotLabel(slot)}
@@ -403,21 +493,35 @@
                 {#each slot.runes as r (r.id)}
                   {@const picked = primaryPicks.has(r.id)}
                   {@const big = slotIdx === 0}
-                  <div
-                    class={picked
-                      ? 'rune-cell rune-on'
-                      : 'rune-cell rune-off'}
-                    title={r.name + (picked ? ' — selected' : '')}
-                  >
-                    <img
-                      src={runeIcon(r.icon)}
-                      alt={r.name}
-                      width={big ? 36 : 26}
-                      height={big ? 36 : 26}
-                      class="rounded-full"
-                      loading="lazy"
-                    />
-                  </div>
+                  <Tooltip>
+                    {#snippet children()}
+                      <div
+                        class={picked ? 'rune-cell rune-on' : 'rune-cell rune-off'}
+                      >
+                        <img
+                          src={runeIcon(r.icon)}
+                          alt={r.name}
+                          width={big ? 36 : 26}
+                          height={big ? 36 : 26}
+                          class="cursor-help rounded-full"
+                          loading="lazy"
+                        />
+                      </div>
+                    {/snippet}
+                    {#snippet content()}
+                      <div class="font-display text-sm uppercase tracking-wider text-hex-goldHi">
+                        {r.name}
+                        {#if picked}
+                          <span class="ml-1 text-[10px] text-hex-cyan">· selected</span>
+                        {/if}
+                      </div>
+                      {#if r.shortDesc}
+                        <p class="ddragon-html mt-1.5 text-[11px] leading-relaxed">
+                          {@html r.shortDesc}
+                        </p>
+                      {/if}
+                    {/snippet}
+                  </Tooltip>
                 {/each}
               </div>
             {/each}
@@ -437,39 +541,84 @@
               <div class="mb-1.5 flex items-center justify-around gap-1">
                 {#each slot.runes as r (r.id)}
                   {@const picked = subPicks.has(r.id)}
-                  <div
-                    class={picked
-                      ? 'rune-cell rune-on'
-                      : 'rune-cell rune-off'}
-                    title={r.name + (picked ? ' — selected' : '')}
-                  >
-                    <img
-                      src={runeIcon(r.icon)}
-                      alt={r.name}
-                      width="26"
-                      height="26"
-                      class="rounded-full"
-                      loading="lazy"
-                    />
-                  </div>
+                  <Tooltip>
+                    {#snippet children()}
+                      <div
+                        class={picked ? 'rune-cell rune-on' : 'rune-cell rune-off'}
+                      >
+                        <img
+                          src={runeIcon(r.icon)}
+                          alt={r.name}
+                          width="26"
+                          height="26"
+                          class="cursor-help rounded-full"
+                          loading="lazy"
+                        />
+                      </div>
+                    {/snippet}
+                    {#snippet content()}
+                      <div class="font-display text-sm uppercase tracking-wider text-hex-goldHi">
+                        {r.name}
+                        {#if picked}
+                          <span class="ml-1 text-[10px] text-hex-cyan">· selected</span>
+                        {/if}
+                      </div>
+                      {#if r.shortDesc}
+                        <p class="ddragon-html mt-1.5 text-[11px] leading-relaxed">
+                          {@html r.shortDesc}
+                        </p>
+                      {/if}
+                    {/snippet}
+                  </Tooltip>
                 {/each}
               </div>
             {/each}
 
             {#if (topRune.statShards ?? []).some((id) => id > 0)}
               <div class="mt-3 border-t border-hex-border/60 pt-2">
-                <p class="mb-1 font-display text-[10px] uppercase tracking-widest text-hex-mist">
+                <p class="mb-1.5 font-display text-[10px] uppercase tracking-widest text-hex-mist">
                   Stat shards
                 </p>
-                <ul class="space-y-0.5 font-mono text-[11px] text-hex-parchment/90">
-                  {#each topRune.statShards as shardId, idx (idx)}
-                    {@const labels = ['Offense', 'Flex', 'Defense']}
-                    <li>
-                      <span class="text-hex-mist">{labels[idx]}:</span>
-                      {statShardLabel(shardId)}
-                    </li>
-                  {/each}
-                </ul>
+                {#each STAT_SHARD_ROWS as row, rowIdx (rowIdx)}
+                  {@const pickedId = topRune.statShards?.[rowIdx]}
+                  <div class="mb-1.5 flex items-center justify-around gap-1">
+                    {#each row as shardId (shardId)}
+                      {@const picked = pickedId === shardId}
+                      {@const iconPath = statShardIconPath(shardId)}
+                      <Tooltip>
+                        {#snippet children()}
+                          <div class={picked ? 'rune-cell rune-on' : 'rune-cell rune-off'}>
+                            {#if iconPath}
+                              <img
+                                src={runeIcon(iconPath)}
+                                alt={statShardLabel(shardId)}
+                                width="22"
+                                height="22"
+                                class="cursor-help rounded-full"
+                                loading="lazy"
+                              />
+                            {/if}
+                          </div>
+                        {/snippet}
+                        {#snippet content()}
+                          <div
+                            class="font-display text-sm uppercase tracking-wider text-hex-goldHi"
+                          >
+                            {statShardLabel(shardId)}
+                            {#if picked}
+                              <span class="ml-1 text-[10px] text-hex-cyan">· selected</span>
+                            {/if}
+                          </div>
+                          {#if statShardDescription(shardId)}
+                            <p class="mt-1.5 text-[11px] leading-relaxed">
+                              {statShardDescription(shardId)}
+                            </p>
+                          {/if}
+                        {/snippet}
+                      </Tooltip>
+                    {/each}
+                  </div>
+                {/each}
               </div>
             {/if}
           </div>
