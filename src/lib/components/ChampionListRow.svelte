@@ -69,7 +69,7 @@
 
 <a
   {href}
-  class="group grid grid-cols-[2.5rem_3rem_minmax(0,1fr)_7.5rem_6rem_5rem] items-center border-b border-hex-border/30 bg-hex-shadow/40 transition-colors duration-100 hover:bg-hex-panel/70"
+  class="group grid grid-cols-[2.25rem_2.5rem_minmax(0,1fr)_4.5rem_3.5rem] items-center border-b border-hex-border/30 bg-hex-shadow/40 transition-colors duration-100 hover:bg-hex-panel/70 sm:grid-cols-[2.5rem_3rem_minmax(0,1fr)_7.5rem_6rem_5rem]"
   aria-label="View {name}"
 >
   {#if rank !== null && isRankClickable}
@@ -121,7 +121,7 @@
     />
   </span>
 
-  <div class="min-w-0 px-3 py-2.5 sm:px-4">
+  <div class="min-w-0 px-2 py-2.5 sm:px-4">
     <p class="truncate font-display text-sm uppercase tracking-wider text-hex-goldHi">
       {name}
     </p>
@@ -134,10 +134,10 @@
     </p>
   </div>
 
-  <span class="flex items-center justify-end border-l border-hex-border/30 px-3 py-2.5 sm:px-4">
+  <span class="flex items-center justify-end border-l border-hex-border/30 px-2 py-2.5 sm:px-4">
     {#if score !== null}
       <span
-        class="inline-flex min-w-[2.5rem] cursor-help justify-center rounded-sm border border-hex-gold/40 bg-hex-gold/10 px-1.5 py-0.5 font-mono text-xs tabular-nums text-hex-goldHi transition-colors duration-100 hover:border-hex-gold hover:bg-hex-gold/20"
+        class="inline-flex min-w-[2.25rem] cursor-help justify-center rounded-sm border border-hex-gold/40 bg-hex-gold/10 px-1.5 py-0.5 font-mono text-xs tabular-nums text-hex-goldHi transition-colors duration-100 hover:border-hex-gold hover:bg-hex-gold/20"
         title={scoreTooltip}
       >
         {score}
@@ -148,7 +148,7 @@
   </span>
 
   <span
-    class="flex items-center justify-end border-l border-hex-border/30 px-3 py-2.5 text-right font-mono text-xs tabular-nums sm:px-4"
+    class="flex items-center justify-end border-l border-hex-border/30 px-2 py-2.5 text-right font-mono text-xs tabular-nums sm:px-4"
   >
     {#if wrPct}
       <span
@@ -163,7 +163,7 @@
   </span>
 
   <span
-    class="flex items-center justify-end border-l border-hex-border/30 px-3 py-2.5 text-right font-mono text-xs tabular-nums text-hex-mist sm:px-4"
+    class="hidden items-center justify-end border-l border-hex-border/30 px-3 py-2.5 text-right font-mono text-xs tabular-nums text-hex-mist sm:flex sm:px-4"
   >
     {#if laneStats && laneStats.games > 0}
       {laneStats.games.toLocaleString()}

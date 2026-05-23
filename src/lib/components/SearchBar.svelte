@@ -70,7 +70,7 @@
       />
     </label>
 
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
       <label class="flex items-center gap-2">
         <span class="font-display text-xs uppercase tracking-widest text-hex-mist">Role</span>
         <select

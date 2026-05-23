@@ -13,6 +13,8 @@
   const COLUMNS: {
     key: SortKey;
     label: string;
+    /** Tighter label for narrow viewports (mobile). Falls back to label. */
+    shortLabel?: string;
     title?: string;
     align: 'left' | 'right';
     helpHash?: string;
@@ -22,11 +24,12 @@
     {
       key: 'score',
       label: 'Hex Score',
+      shortLabel: 'Score',
       align: 'right',
       helpHash: 'hex-score',
       helpLabel: 'What is the Hex Score?'
     },
-    { key: 'winrate', label: 'Win rate', align: 'right' },
+    { key: 'winrate', label: 'Win rate', shortLabel: 'WR', align: 'right' },
     {
       key: 'games',
       label: 'GPTP',
@@ -47,7 +50,7 @@
 
 <div class="border-b border-hex-border bg-hex-deep/70">
   <div
-    class="grid grid-cols-[2.5rem_3rem_minmax(0,1fr)_7.5rem_6rem_5rem] items-stretch text-[11px] uppercase tracking-wider text-hex-mist"
+    class="grid grid-cols-[2.25rem_2.5rem_minmax(0,1fr)_4.5rem_3.5rem] items-stretch text-[11px] uppercase tracking-wider text-hex-mist sm:grid-cols-[2.5rem_3rem_minmax(0,1fr)_7.5rem_6rem_5rem]"
   >
     <button
       type="button"
@@ -65,19 +68,20 @@
 
     {#each COLUMNS as col, i (col.key)}
       {@const active = col.key === sort}
+      {@const mobileHidden = col.key === 'games'}
       <button
         type="button"
         onclick={() => onSort(col.key)}
         aria-pressed={active}
         title={col.title ?? col.label}
-        class="flex items-center gap-1 overflow-hidden px-2 py-2.5 font-display uppercase tracking-wider transition-colors hover:bg-hex-panel/40 hover:text-hex-goldHi focus:outline-none focus-visible:bg-hex-panel/40 focus-visible:text-hex-goldHi sm:px-3 {i >
-        0
-          ? 'border-l border-hex-border/40'
-          : ''} {col.align === 'right' ? 'justify-end text-right' : 'text-left'} {active
-          ? 'text-hex-gold'
-          : ''}"
+        class="items-center gap-1 overflow-hidden px-2 py-2.5 font-display uppercase tracking-wider transition-colors hover:bg-hex-panel/40 hover:text-hex-goldHi focus:outline-none focus-visible:bg-hex-panel/40 focus-visible:text-hex-goldHi sm:px-3 {mobileHidden
+          ? 'hidden sm:flex'
+          : 'flex'} {i > 0 ? 'border-l border-hex-border/40' : ''} {col.align === 'right'
+          ? 'justify-end text-right'
+          : 'text-left'} {active ? 'text-hex-gold' : ''}"
       >
-        <span class="whitespace-nowrap">{col.label}</span>
+        <span class="whitespace-nowrap sm:hidden">{col.shortLabel ?? col.label}</span>
+        <span class="hidden whitespace-nowrap sm:inline">{col.label}</span>
         {#if col.helpHash}
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -86,7 +90,7 @@
             aria-label={col.helpLabel ?? `Learn more about ${col.label}`}
             title={col.helpLabel ?? `Learn more about ${col.label}`}
             onclick={(e) => e.stopPropagation()}
-            class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-hex-border text-[10px] text-hex-mist transition-colors duration-100 hover:border-hex-gold hover:text-hex-goldHi focus:outline-none focus-visible:ring-2 focus-visible:ring-hex-cyan/60"
+            class="hidden h-4 w-4 shrink-0 items-center justify-center rounded-full border border-hex-border text-[10px] text-hex-mist transition-colors duration-100 hover:border-hex-gold hover:text-hex-goldHi focus:outline-none focus-visible:ring-2 focus-visible:ring-hex-cyan/60 sm:inline-flex"
           >
             ?
           </a>
