@@ -151,3 +151,27 @@ export function laneFromSlug(slug: string | null | undefined): Lane | null {
   const match = LANES.find((l) => l.slug === slug.toLowerCase());
   return match ? match.value : null;
 }
+
+/** Skill-level filter buckets, derived from DDragon's 0–10 `info.difficulty` rating. */
+export type DifficultyBucket = 'easy' | 'medium' | 'hard';
+
+export const DIFFICULTY_BUCKETS: readonly { value: DifficultyBucket; label: string }[] = [
+  { value: 'easy', label: 'Beginner' },
+  { value: 'medium', label: 'Intermediate' },
+  { value: 'hard', label: 'Expert' }
+] as const;
+
+/** Map DDragon's 0–10 `info.difficulty` rating to a filter bucket.
+ *   0–3 = Easy (Annie, Garen, Master Yi)
+ *   4–6 = Medium (most champions)
+ *   7–10 = Hard (Riven, Yasuo, Azir, Lee Sin)
+ *
+ * Note: DDragon's difficulty values are an older editorial scale. Akshan/Rell/
+ * Seraphine/Vex ship as 0 because Riot never filled them in; we backfill those
+ * from CommunityDragon in `getChampions()` so they land in the right bucket. */
+export function difficultyBucket(rating: number | undefined | null): DifficultyBucket | null {
+  if (rating == null) return null;
+  if (rating <= 3) return 'easy';
+  if (rating <= 6) return 'medium';
+  return 'hard';
+}

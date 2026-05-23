@@ -33,7 +33,7 @@
   );
   const warningTooltip = $derived(
     typeof relativeShare === 'number'
-      ? `Only ${(relativeShare * 100).toFixed(1)}% ${warningContext} — off-meta pick`
+      ? `Only ${(relativeShare * 100).toFixed(1)}% ${warningContext} — off-meta (not the usual pick for this role)`
       : ''
   );
 </script>
@@ -89,8 +89,8 @@
 
   .mark.info {
     color: theme('colors.hex.mist');
-    opacity: 0.55;
-    transition: opacity 120ms;
+    opacity: 0.65;
+    transition: opacity 80ms;
   }
 
   .mark.info:hover,
@@ -123,7 +123,7 @@
     opacity: 0;
     pointer-events: none;
     z-index: 50;
-    transition: opacity 120ms;
+    transition: opacity 80ms;
     transition-delay: 0ms;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   }
@@ -131,6 +131,6 @@
   .mark:hover .tip,
   .mark:focus-visible .tip {
     opacity: 1;
-    transition-delay: 500ms;
+    transition-delay: 100ms;
   }
 </style>

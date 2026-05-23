@@ -11,6 +11,13 @@
     </p>
     <p class="text-xs text-hex-mist">
       Created by Adam Håkansson. © {year} ·
+      <a
+        href="/faq"
+        class="text-hex-gold hover:text-hex-goldHi underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-hex-cyan/60"
+      >
+        FAQ
+      </a>
+      ·
       <button
         type="button"
         onclick={openConsentModal}

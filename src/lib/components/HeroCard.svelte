@@ -19,7 +19,7 @@
 
 <a
   {href}
-  class="group relative block overflow-hidden rounded-md border border-hex-border bg-hex-shadow transition-all duration-300 hover:-translate-y-1 hover:border-hex-gold/80 hover:shadow-hexHover"
+  class="group relative block overflow-hidden rounded-md border border-hex-border bg-hex-shadow transition-all duration-150 hover:-translate-y-1 hover:border-hex-gold/80 hover:shadow-hexHover"
   aria-label="View {name}"
 >
   <div class="relative aspect-[3/5] overflow-hidden">
@@ -28,7 +28,7 @@
       alt="{name} splash art"
       loading="lazy"
       decoding="async"
-      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
     />
     <div
       class="pointer-events-none absolute inset-0 bg-gradient-to-t from-hex-void via-hex-void/40 to-transparent"

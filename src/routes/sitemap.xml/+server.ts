@@ -16,6 +16,7 @@ export const GET: RequestHandler = async ({ fetch, setHeaders }) => {
   const urls: Array<{ loc: string; lastmod: string; changefreq: string; priority: string }> = [
     { loc: `${SITE_URL}/`, lastmod: today, changefreq: 'daily', priority: '1.0' },
     { loc: `${SITE_URL}/winrates`, lastmod: buildsLastmod, changefreq: 'daily', priority: '0.9' },
+    { loc: `${SITE_URL}/faq`, lastmod: today, changefreq: 'monthly', priority: '0.5' },
     ...champions.map((c) => ({
       loc: `${SITE_URL}/champion/${c.id}`,
       lastmod: buildsLastmod,

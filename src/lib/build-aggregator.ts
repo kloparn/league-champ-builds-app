@@ -155,6 +155,64 @@ export function championLanesFromStats(
   return lanes;
 }
 
+/**
+ * Wilson 95% lower-bound of a binomial win rate. Small samples get pulled
+ * toward 0; large samples converge on the raw win rate. The standard fix for
+ * "60% on 5 games beats 53% on 5000 games" noise.
+ */
+export function wilsonLowerBound(wins: number, games: number, z = 1.96): number {
+  if (games <= 0) return 0;
+  const p = wins / games;
+  const denom = 1 + (z * z) / games;
+  const center = p + (z * z) / (2 * games);
+  const margin = z * Math.sqrt((p * (1 - p) + (z * z) / (4 * games)) / games);
+  return Math.max(0, (center - margin) / denom);
+}
+
+/**
+ * Hex Score — proprietary 0–100 ranking that combines win rate and presence
+ * for a single champion in a single role.
+ *
+ *   performance (70%): Wilson lower-bound of win rate. Anchored so a
+ *                       sustained 50% wr lands around mid-tier (~50) and
+ *                       a sustained 55% wr maxes out (~100). Small samples
+ *                       are auto-penalised because Wilson pulls them down.
+ *   presence    (30%): champion's share of all matches in the role
+ *                       (cap at 10% pickshare = full marks; that's roughly
+ *                       what a tier-1 meta pick captures at Diamond+).
+ *
+ * Use this to compare champions within the same role. Cross-role comparisons
+ * are still meaningful but biased toward roles with smaller candidate pools.
+ */
+export function championScore(opts: {
+  wins: number;
+  games: number;
+  /** Champion's share of all matches played in the role: champ.games / totalRoleGames. */
+  rolePickShare: number;
+}): number {
+  if (opts.games <= 0) return 0;
+  const wlb = wilsonLowerBound(opts.wins, opts.games);
+  // Anchor: 0.45 wlb → 0, 0.55 wlb → 100 (the realistic range at Diamond+).
+  const performance = Math.max(0, Math.min(100, ((wlb - 0.45) / 0.1) * 100));
+  // Anchor: 10% pickshare → 100 (tier-1 meta pick).
+  const presence = Math.max(0, Math.min(100, (opts.rolePickShare / 0.1) * 100));
+  return Math.round(0.7 * performance + 0.3 * presence);
+}
+
+/** Sum each champion's games per role into a map so callers can compute
+ * each champion's rolePickShare. */
+export function totalGamesByRole(
+  champions: Record<string, ChampionBuildStats>
+): Record<string, number> {
+  const totals: Record<string, number> = {};
+  for (const stats of Object.values(champions)) {
+    for (const [role, rb] of Object.entries(stats.byRole)) {
+      totals[role] = (totals[role] ?? 0) + rb.games;
+    }
+  }
+  return totals;
+}
+
 export interface BuildsData {
   generatedAt: string;
   patch: string;

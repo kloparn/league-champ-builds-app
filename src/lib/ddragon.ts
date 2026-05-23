@@ -68,6 +68,10 @@ export async function getChampions(
     `${DDRAGON}/cdn/${version}/data/en_US/champion.json`
   );
   const champions = Object.values(data.data).sort((a, b) => a.name.localeCompare(b.name));
+  // Backfill the handful of champions DDragon ships with info {0,0,0,0}
+  // (Akshan, Rell, Seraphine, Vex on the current patch) so the difficulty
+  // filter on the home page matches what's shown on the champion detail page.
+  await Promise.all(champions.map((c) => backfillInfo(c, fetchFn)));
   setCached(cacheKey, champions, CHAMPIONS_TTL_MS);
   return { version, champions };
 }
@@ -104,7 +108,7 @@ async function backfillStats(champion: ChampionDetail, fetchFn: typeof fetch): P
   }
 }
 
-async function backfillInfo(champion: ChampionDetail, fetchFn: typeof fetch): Promise<void> {
+async function backfillInfo(champion: ChampionSummary, fetchFn: typeof fetch): Promise<void> {
   const { attack, defense, magic, difficulty } = champion.info;
   if (attack || defense || magic || difficulty) return;
   try {

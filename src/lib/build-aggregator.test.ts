@@ -3,6 +3,7 @@ import {
   addMatchToState,
   aggregateBuilds,
   championLanesFromStats,
+  championScore,
   createBucketState,
   deserializeBucketState,
   displayRole,
@@ -12,6 +13,8 @@ import {
   patchFromGameVersion,
   rolesByPopularity,
   serializeBucketState,
+  totalGamesByRole,
+  wilsonLowerBound,
   type ChampionBuildStats,
   type MatchDto,
   type MatchParticipant,
@@ -683,5 +686,109 @@ describe('championLanesFromStats', () => {
     // Vladimir-like spread: 31% top, 44% mid, 25% bot
     const stats = champ({ TOP: 310, MIDDLE: 440, BOTTOM: 250 });
     expect(championLanesFromStats(stats).sort()).toEqual(['BOTTOM', 'MIDDLE', 'TOP']);
+  });
+});
+
+describe('wilsonLowerBound', () => {
+  it('returns 0 for zero games', () => {
+    expect(wilsonLowerBound(0, 0)).toBe(0);
+  });
+
+  it('pulls small-sample win rates down', () => {
+    // 70% wr on 10 games should land well below 70% true rate
+    const wlb = wilsonLowerBound(7, 10);
+    expect(wlb).toBeGreaterThan(0.3);
+    expect(wlb).toBeLessThan(0.55);
+  });
+
+  it('converges on the raw win rate as sample grows', () => {
+    expect(wilsonLowerBound(5000, 10000)).toBeCloseTo(0.5, 1);
+    expect(wilsonLowerBound(5500, 10000)).toBeCloseTo(0.55, 1);
+  });
+
+  it('penalises noisier samples more than identical-rate big ones', () => {
+    // Both 60% wr; the smaller sample must score lower.
+    expect(wilsonLowerBound(6, 10)).toBeLessThan(wilsonLowerBound(600, 1000));
+  });
+});
+
+describe('championScore', () => {
+  it('returns 0 when games is zero', () => {
+    expect(championScore({ wins: 0, games: 0, rolePickShare: 0 })).toBe(0);
+  });
+
+  it('scores a median champion near 50 on overall play', () => {
+    // 50% wr on a large sample + decent presence ≈ mid-tier score.
+    const s = championScore({ wins: 500, games: 1000, rolePickShare: 0.1 });
+    expect(s).toBeGreaterThan(30);
+    expect(s).toBeLessThan(60);
+  });
+
+  it('rewards higher win rate over the same presence', () => {
+    const lo = championScore({ wins: 500, games: 1000, rolePickShare: 0.1 });
+    const hi = championScore({ wins: 560, games: 1000, rolePickShare: 0.1 });
+    expect(hi).toBeGreaterThan(lo);
+  });
+
+  it('rewards higher presence over the same win rate', () => {
+    const niche = championScore({ wins: 550, games: 1000, rolePickShare: 0.02 });
+    const meta = championScore({ wins: 550, games: 1000, rolePickShare: 0.18 });
+    expect(meta).toBeGreaterThan(niche);
+  });
+
+  it('penalises tiny samples even at high win rate', () => {
+    // 70% wr on 10 games should NOT outscore 53% wr on 1000 games.
+    const flukey = championScore({ wins: 7, games: 10, rolePickShare: 0.005 });
+    const consistent = championScore({ wins: 530, games: 1000, rolePickShare: 0.1 });
+    expect(consistent).toBeGreaterThan(flukey);
+  });
+
+  it('clamps to 0..100', () => {
+    expect(championScore({ wins: 0, games: 100, rolePickShare: 0 })).toBe(0);
+    const max = championScore({ wins: 1000, games: 1000, rolePickShare: 0.5 });
+    expect(max).toBeLessThanOrEqual(100);
+    expect(max).toBeGreaterThan(85);
+  });
+});
+
+describe('totalGamesByRole', () => {
+  function build(byRole: Record<string, number>): ChampionBuildStats {
+    const games = Object.values(byRole).reduce((a, b) => a + b, 0);
+    return {
+      championId: 1,
+      championName: 'X',
+      games,
+      wins: 0,
+      winrate: 0,
+      byRole: Object.fromEntries(
+        Object.entries(byRole).map(([r, g]) => [
+          r,
+          {
+            games: g,
+            wins: 0,
+            winrate: 0,
+            topItems: [],
+            itemPath: [],
+            topBoots: [],
+            topRunes: [],
+            topSummonerSpells: [],
+            skillOrder: []
+          }
+        ])
+      )
+    };
+  }
+
+  it('sums each champion contribution into the per-role total', () => {
+    const totals = totalGamesByRole({
+      A: build({ TOP: 100, MIDDLE: 200 }),
+      B: build({ TOP: 50, JUNGLE: 300 }),
+      C: build({ MIDDLE: 50 })
+    });
+    expect(totals).toEqual({ TOP: 150, JUNGLE: 300, MIDDLE: 250 });
+  });
+
+  it('returns an empty object when there are no champions', () => {
+    expect(totalGamesByRole({})).toEqual({});
   });
 });
