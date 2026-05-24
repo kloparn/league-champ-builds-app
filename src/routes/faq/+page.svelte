@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { slide } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { OFF_META_THRESHOLD } from '$lib/build-aggregator';
@@ -15,13 +16,15 @@
   }
 
   // Deep links like /faq#hex-score auto-open + scroll to the matching section.
+  // untrack the openItems read so the effect doesn't re-run on toggles —
+  // otherwise closing the deep-linked item immediately re-opens it.
   $effect(() => {
     if (typeof window === 'undefined') return;
     const applyHash = () => {
       const hash = window.location.hash.slice(1);
       if (!hash) return;
       if (faqs.some((f) => f.id === hash)) {
-        openItems = new Set([...openItems, hash]);
+        openItems = new Set([...untrack(() => openItems), hash]);
         // Wait for the slide transition to allocate height before scrolling.
         setTimeout(() => {
           document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -207,7 +210,7 @@
     <p class="mt-10 text-center text-xs text-hex-mist/70">
       Question we missed? Open an issue or
       <a
-        href="mailto:adam.hakansson@bonniernews.se"
+        href="mailto:adam.hakanson@hotmail.com"
         class="text-hex-gold underline-offset-2 hover:text-hex-goldHi hover:underline"
         >drop us a line</a
       >.

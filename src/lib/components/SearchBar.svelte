@@ -10,12 +10,14 @@
   } from '$lib/view-mode.svelte';
 
   export type SortKey = 'name' | 'score' | 'winrate' | 'games';
+  export type SortDir = 'asc' | 'desc';
 
   interface Props {
     query: string;
     lane: Lane | '';
     difficulty: DifficultyBucket | '';
     sort: SortKey;
+    sortDir: SortDir;
     count: number;
   }
 
@@ -24,15 +26,42 @@
     lane = $bindable(),
     difficulty = $bindable(),
     sort = $bindable(),
+    sortDir = $bindable(),
     count
   }: Props = $props();
 
-  const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-    { value: 'name', label: 'Name (A→Z)' },
-    { value: 'score', label: 'Hex Score' },
-    { value: 'winrate', label: 'Win rate' },
-    { value: 'games', label: 'Most played' }
+  // Each dropdown entry carries the (sort, dir) it should apply. Name gets both
+  // directions because the splash view has no other way to flip A→Z / Z→A;
+  // stat sorts default to desc (best-first) and rely on the list view's column
+  // headers if you want to invert them.
+  type SortOption = { key: string; label: string; sort: SortKey; dir: SortDir };
+  const SORT_OPTIONS: SortOption[] = [
+    { key: 'name-asc', label: 'Name (A→Z)', sort: 'name', dir: 'asc' },
+    { key: 'name-desc', label: 'Name (Z→A)', sort: 'name', dir: 'desc' },
+    { key: 'score', label: 'Hex Score', sort: 'score', dir: 'desc' },
+    { key: 'winrate', label: 'Win rate', sort: 'winrate', dir: 'desc' },
+    { key: 'games', label: 'Most played', sort: 'games', dir: 'desc' }
   ];
+
+  // The dropdown's selected value is fully determined by (sort, sortDir).
+  // We derive it for the <select> and rely on onchange to push the user's
+  // pick back into the parent's sort/sortDir state — no intermediate
+  // sortKey signal, no $effect mirror, nothing that can run between the
+  // change event's listeners and revert the DOM value.
+  const sortKey = $derived(sort === 'name' ? `name-${sortDir}` : sort);
+
+  function onSortPick(e: Event): void {
+    const target = e.currentTarget as HTMLSelectElement;
+    const opt = SORT_OPTIONS.find((o) => o.key === target.value);
+    if (!opt) return;
+    sort = opt.sort;
+    sortDir = opt.dir;
+    // Stat sorts are illegible in splash cards (no visible score/winrate/games),
+    // so jump to the list view where the column header labels what's sorted.
+    if (opt.sort !== 'name' && viewMode.value !== 'list') {
+      setViewMode('list');
+    }
+  }
 
   // Show the "try detailed view" hint only after the client mounts, only for users
   // who haven't dismissed it, and only while they're still on the splash view.
@@ -107,13 +136,14 @@
         <label class="flex items-center gap-2">
           <span class="font-display text-xs uppercase tracking-widest text-hex-mist">Sort</span>
           <select
-            bind:value={sort}
+            value={sortKey}
+            onchange={onSortPick}
             aria-label="Sort order"
             class="hex-input min-w-[8rem] appearance-none bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat pr-8"
             style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 12 12%22 fill=%22none%22 stroke=%22%23C8AA6E%22 stroke-width=%221.5%22><path d=%22m3 4.5 3 3 3-3%22/></svg>');"
           >
-            {#each SORT_OPTIONS as opt (opt.value)}
-              <option value={opt.value}>{opt.label}</option>
+            {#each SORT_OPTIONS as opt (opt.key)}
+              <option value={opt.key}>{opt.label}</option>
             {/each}
           </select>
         </label>
@@ -137,7 +167,16 @@
             type="button"
             aria-pressed={viewMode.value === 'splash'}
             aria-label="Splash card view"
-            onclick={() => setViewMode('splash')}
+            onclick={() => {
+              // Splash cards don't surface score/winrate/games, so any held-over
+              // sort would silently scramble the grid. Reset to the default on
+              // the way back in.
+              if (viewMode.value !== 'splash') {
+                sort = 'name';
+                sortDir = 'asc';
+              }
+              setViewMode('splash');
+            }}
             class="px-2.5 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-hex-cyan/60 {viewMode.value ===
             'splash'
               ? 'bg-hex-gold/15 text-hex-goldHi'

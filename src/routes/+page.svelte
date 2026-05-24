@@ -114,7 +114,7 @@
       </p>
     </div>
 
-    <SearchBar bind:query bind:lane bind:difficulty bind:sort count={filtered.length} />
+    <SearchBar bind:query bind:lane bind:difficulty bind:sort bind:sortDir count={filtered.length} />
 
     {#if filtered.length === 0}
       <p class="py-16 text-center text-hex-mist">No champions match your search.</p>

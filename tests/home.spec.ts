@@ -1,4 +1,18 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
+
+/**
+ * Playwright's selectOption is non-deterministic on webkit — under parallel
+ * load it sometimes fails to settle the picked value before the change event
+ * fires, leaving the bound Svelte state on the previous value. Setting value
+ * + dispatching change directly produces the same user-visible effect with
+ * deterministic timing across all three browsers.
+ */
+async function pickSelect(select: Locator, value: string): Promise<void> {
+  await select.evaluate((el, v) => {
+    (el as HTMLSelectElement).value = v;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, value);
+}
 
 test('home page renders champion grid (SSR)', async ({ page }) => {
   await page.goto('/');
@@ -35,7 +49,7 @@ test('filtering by lane only shows champions where that lane is non-off-meta', a
 
   // Pick Jungle — should narrow the list and never include obvious non-junglers
   // like Annie or Caitlyn (both ≪5% in JUNGLE).
-  await page.getByLabel('Role filter').selectOption('JUNGLE');
+  await pickSelect(page.getByLabel('Role filter'), 'JUNGLE');
 
   const jungleCount = await cards.count();
   expect(jungleCount).toBeGreaterThan(0);
@@ -61,14 +75,14 @@ test('lane filter combines with name search', async ({ page }) => {
 
   // "Lee Sin" is a unique substring match.
   await page.getByLabel(/Search champion/i).fill('Lee Sin');
-  await page.getByLabel('Role filter').selectOption('JUNGLE');
+  await pickSelect(page.getByLabel('Role filter'), 'JUNGLE');
 
   const cards = page.locator('ul a[href^="/champion/"]');
   await expect(cards).toHaveCount(1);
   await expect(cards.first()).toHaveAttribute('href', /^\/champion\/LeeSin(\?|$)/);
 
   // Same search but filtering Support — Lee Sin is not a support, expect zero results.
-  await page.getByLabel('Role filter').selectOption('UTILITY');
+  await pickSelect(page.getByLabel('Role filter'), 'UTILITY');
   await expect(cards).toHaveCount(0);
 });
 
@@ -76,7 +90,7 @@ test('selected lane is forwarded to the champion page and pre-selects the role t
   page
 }) => {
   await page.goto('/');
-  await page.getByLabel('Role filter').selectOption('JUNGLE');
+  await pickSelect(page.getByLabel('Role filter'), 'JUNGLE');
 
   // Cards now link with ?role=jungle (lowercase slug, not the internal Riot key)
   const leeSinCard = page.locator('ul a[href="/champion/LeeSin?role=jungle"]');
@@ -145,7 +159,7 @@ test('list view toggle switches layout and persists across reloads', async ({ pa
 test('list view honours lane filter and forwards the role slug on click', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'List view' }).click();
-  await page.getByLabel('Role filter').selectOption('JUNGLE');
+  await pickSelect(page.getByLabel('Role filter'), 'JUNGLE');
 
   const leeSinRow = page.getByRole('link', { name: 'View Lee Sin' });
   await expect(leeSinRow).toHaveAttribute('href', '/champion/LeeSin?role=jungle');
@@ -299,7 +313,7 @@ test('difficulty filter narrows the grid by DDragon info.difficulty', async ({ p
   const cards = page.locator('ul a[href^="/champion/"]');
   await expect(cards.first()).toBeVisible();
 
-  await page.getByLabel('Skill level filter').selectOption('easy');
+  await pickSelect(page.getByLabel('Skill level filter'), 'easy');
 
   // DDragon-easy (0–3): Amumu (3) and Darius (2) are in. Riven/Azir/Yasuo (8–10) are out.
   await expect(page.locator('ul a[href^="/champion/Amumu"]')).toBeVisible();
@@ -322,6 +336,75 @@ test('FAQ is linked from the footer', async ({ page }) => {
   await page.goto('/');
   const footerLink = page.locator('footer a[href="/faq"]');
   await expect(footerLink).toBeVisible();
+});
+
+test('FAQ deep link auto-opens the section without locking the user into it', async ({ page }) => {
+  await page.goto('/faq#hex-score');
+
+  // Deep link should auto-open the matching panel.
+  await expect(page.locator('#hex-score-panel')).toBeVisible();
+
+  // Regression: before the untrack fix, toggling any FAQ caused the $effect to
+  // re-run and re-open the deep-linked section, so closing it was impossible.
+  // Closing must actually stick.
+  await page.locator('#hex-score button[aria-expanded="true"]').click();
+  await expect(page.locator('#hex-score-panel')).toHaveCount(0);
+
+  // And a *different* section must be openable while the deep-linked id is in the URL.
+  await page.locator('#data-source button').click();
+  await expect(page.locator('#data-source-panel')).toBeVisible();
+  // The deep-linked one stays closed — the hash effect doesn't fight us anymore.
+  await expect(page.locator('#hex-score-panel')).toHaveCount(0);
+});
+
+test('splash + picking a stat sort jumps to list view', async ({ page }) => {
+  await page.goto('/');
+
+  // The Sort dropdown is only rendered in splash view.
+  await expect(page.getByLabel('Sort order')).toBeVisible();
+
+  await pickSelect(page.getByLabel('Sort order'), 'score');
+
+  // After picking Hex Score the view must flip to list (column headers label the sort).
+  await expect(page.getByRole('button', { name: 'List view' })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+  // Dropdown disappears in list view — sorting happens via column headers there.
+  await expect(page.getByLabel('Sort order')).toHaveCount(0);
+});
+
+test('splash + Name (Z→A) reverses order without leaving splash view', async ({ page }) => {
+  await page.goto('/');
+
+  await pickSelect(page.getByLabel('Sort order'), 'name-desc');
+
+  // Still on splash — only stat sorts trigger the view jump.
+  await expect(page.getByRole('button', { name: 'Splash card view' })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+
+  // First card is no longer Aatrox (default A→Z first); Aatrox is now last.
+  const cards = page.locator('ul a[href^="/champion/"]');
+  await expect(cards.first()).not.toHaveAttribute('href', /^\/champion\/Aatrox/);
+  await expect(cards.last()).toHaveAttribute('href', /^\/champion\/Aatrox/);
+});
+
+test('switching back to splash resets sort to the default name-ascending', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'List view' }).click();
+
+  // Apply a non-default sort in list view.
+  await page.getByRole('button', { name: /^Hex Score/ }).click();
+  const cards = page.locator('ul a[href^="/champion/"]');
+  await expect(cards.first()).not.toHaveAttribute('href', /^\/champion\/Aatrox/);
+
+  // Going back to splash must reset to name-asc — otherwise splash would render a
+  // mystery order (cards don't surface the stat that drove the sort).
+  await page.getByRole('button', { name: 'Splash card view' }).click();
+  await expect(cards.first()).toHaveAttribute('href', /^\/champion\/Aatrox/);
+  await expect(page.getByLabel('Sort order')).toHaveValue('name-asc');
 });
 
 test('robots.txt is served', async ({ request }) => {
