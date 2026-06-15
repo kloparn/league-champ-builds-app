@@ -8,10 +8,19 @@ on:
 permissions:
   contents: write
 
+# Never let two refreshes run at once (a manual dispatch overlapping the cron,
+# or a slow run bleeding into the next day) — overlap would race on the commit
+# push. Don't cancel an in-flight run; let it finish and checkpoint its state.
+concurrency:
+  group: refresh-builds
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 960
+    # GitHub-hosted runners hard-kill any job at 6h, so a larger value is a
+    # no-op. Stay under the cap; checkpointing makes a kill non-fatal anyway.
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +43,11 @@ jobs:
           if [[ -n "$(git status --porcelain static/builds.json data/builds-state.json.gz data/seen-matches.bin)" ]]; then
             git add static/builds.json data/builds-state.json.gz data/seen-matches.bin
             git commit -m "chore: refresh builds.json"
+            # Rebase onto anything that landed since checkout so the push doesn't
+            # bounce on a non-fast-forward. The data files have only this workflow
+            # as a writer (serialized by the concurrency group), so this is
+            # conflict-free in practice.
+            git pull --rebase origin "$GITHUB_REF_NAME"
             git push
           else
             echo "No changes."

@@ -3,8 +3,7 @@
   import { slide } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { OFF_META_THRESHOLD } from '$lib/build-aggregator';
-
-  const SITE_URL = 'https://leaguebuilds.org';
+  import { SITE_URL } from '$lib/site';
 
   let openItems = $state(new Set<string>());
 

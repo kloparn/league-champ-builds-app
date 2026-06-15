@@ -1,8 +1,7 @@
 import { getChampions } from '$lib/ddragon';
 import { getBuilds } from '$lib/builds';
+import { SITE_URL } from '$lib/site';
 import type { RequestHandler } from './$types';
-
-const SITE_URL = 'https://leaguebuilds.org';
 
 export const GET: RequestHandler = async ({ fetch, setHeaders }) => {
   const { champions } = await getChampions(fetch);

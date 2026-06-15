@@ -82,15 +82,20 @@
   {@render children()}
 </span>
 
-<div
-  bind:this={popoverEl}
-  popover="manual"
-  role="tooltip"
-  class="tooltip-pop"
-  style="width: {width}px; max-width: min({width}px, calc(100vw - 1rem));"
->
-  {@render content()}
-</div>
+<!-- Only render the popover when the Popover API is available. Without it the
+     `popover` attribute is inert, so the browser's "hide until open" UA rule
+     never applies and the content would render as a permanently-visible block. -->
+{#if supported}
+  <div
+    bind:this={popoverEl}
+    popover="manual"
+    role="tooltip"
+    class="tooltip-pop"
+    style="width: {width}px; max-width: min({width}px, calc(100vw - 1rem));"
+  >
+    {@render content()}
+  </div>
+{/if}
 
 <style>
   .tooltip-trigger {

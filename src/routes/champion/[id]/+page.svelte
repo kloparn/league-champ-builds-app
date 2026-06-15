@@ -9,6 +9,7 @@
   import { splashArt } from '$lib/ddragon';
   import { page } from '$app/state';
   import { laneFromSlug } from '$lib/types';
+  import { SITE_URL } from '$lib/site';
   import type { PageData } from './$types';
 
   interface Props {
@@ -27,7 +28,6 @@
   const ogDescription = $derived(
     `${c.lore.slice(0, 180)}${c.lore.length > 180 ? '…' : ''}`
   );
-  const SITE_URL = 'https://leaguebuilds.org';
   const canonicalUrl = $derived(`${SITE_URL}/champion/${c.id}`);
   const championJsonLd = $derived(
     JSON.stringify({

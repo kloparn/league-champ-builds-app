@@ -4,10 +4,10 @@
   import ConsentBanner from '$lib/components/ConsentBanner.svelte';
   import ConsentModal from '$lib/components/ConsentModal.svelte';
   import { page } from '$app/state';
+  import { SITE_URL } from '$lib/site';
 
   let { children } = $props();
 
-  const SITE_URL = 'https://leaguebuilds.org';
   const DEFAULT_OG_IMAGE = `${SITE_URL}/league-background.png`;
 
   const canonicalUrl = $derived(`${SITE_URL}${page.url.pathname}`);

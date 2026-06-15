@@ -35,8 +35,13 @@
   }
 
   function onKeydown(event: KeyboardEvent) {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    // Don't hijack arrow keys while the user is in a text field (e.g. moving the
+    // caret in the "Jump to champion" search that shares the champion page).
+    const el = event.target as HTMLElement | null;
+    if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
     if (event.key === 'ArrowRight') goNext();
-    if (event.key === 'ArrowLeft') goPrev();
+    else goPrev();
   }
 
   const skinLabel = $derived(

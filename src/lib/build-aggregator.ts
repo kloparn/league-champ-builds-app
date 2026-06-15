@@ -400,7 +400,7 @@ export function addMatchToState(
     addSpells(roleBucket, p);
 
     if (timeline) {
-      addSkillOrder(roleBucket, i + 1, timeline, p.win);
+      addSkillOrder(roleBucket, i + 1, timeline);
     }
   }
 }
@@ -795,8 +795,7 @@ function addRune(rb: RoleBucket, p: MatchParticipant): void {
 function addSkillOrder(
   rb: RoleBucket,
   participantId: number,
-  timeline: MatchTimelineDto,
-  win: boolean
+  timeline: MatchTimelineDto
 ): void {
   let level = 0;
   for (const frame of timeline.info.frames) {
@@ -814,7 +813,6 @@ function addSkillOrder(
     }
     if (level >= MAX_LEVEL) break;
   }
-  void win;
 }
 
 function addSpells(rb: RoleBucket, p: MatchParticipant): void {

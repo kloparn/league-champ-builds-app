@@ -53,15 +53,8 @@
   }
 
   function onKeydown(e: KeyboardEvent) {
-    if (!showResults || results.length === 0) {
-      // Allow ArrowDown to open results if there's a query but nothing focused.
-      if (e.key === 'ArrowDown' && results.length > 0) {
-        e.preventDefault();
-        focused = true;
-        activeIndex = 0;
-      }
-      return;
-    }
+    // Nothing to navigate unless the listbox is open with at least one result.
+    if (!showResults || results.length === 0) return;
 
     switch (e.key) {
       case 'ArrowDown':
